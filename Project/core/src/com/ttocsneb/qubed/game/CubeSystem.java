@@ -19,27 +19,20 @@ public class CubeSystem extends EntitySystem {
 	private GameScreen game;
 	private Engine engine;
 	
-	private PlayerSystem player;
-	private PlayerSystem.Triangle playerMesh;
-	
-	private BulletSystem bullet;
-	
 	private float interpolation;
 	
 	private Vector2 a, b, c, d;
 	
-	public CubeSystem(GameScreen gs, PlayerSystem ps, BulletSystem bs) {
+	public CubeSystem(GameScreen gs) {
 		game = gs;
 		interpolation = 0;
-		player = ps;
-		bullet = bs;
 		
 		a = new Vector2();
 		b = new Vector2();
 		c = new Vector2();
 		d = new Vector2();
 	}
-	
+
 	@Override
 	@SuppressWarnings("unchecked")
 	public void addedToEngine(Engine engine) {
@@ -50,8 +43,6 @@ public class CubeSystem extends EntitySystem {
 	@Override
 	public void update(float delta) {
 		float size, distance;
-		
-		playerMesh = player.getTriangle();
 		
 		for(int i=0; i<entities.size(); i++) {
 			Entity entity = entities.get(i);
@@ -108,27 +99,9 @@ public class CubeSystem extends EntitySystem {
 					d.x, d.y,
 					a.x, a.y);
 
-			if((pointinPlayer(a) || pointinPlayer(b) || pointinPlayer(c) || pointinPlayer(d) || distance <= player.getSize()/2f) && !cube.die){
-				cube.die = true;
-				player.damage(cube.scale*0.5f);
-			}
 			
 			
 		}
-	}
-	
-	private float sign(Vector2 p1, Vector2 p2, Vector2 c) {
-		return ((p2.x - p1.x)*(c.y-p1.y) - (p2.y - p1.y)*(c.x - p1.x));
-	}
-	
-	private boolean pointinPlayer(Vector2 point) {
-		
-		boolean b1 = sign(playerMesh.a, playerMesh.b, point) < 0f;
-		boolean b2 = sign(playerMesh.b, playerMesh.c, point) < 0f;
-		boolean b3 = sign(playerMesh.c, playerMesh.a, point) < 0f;
-		
-		return ((b1 == b2) && (b2 == b3));
-		
 	}
 	
 	private float lerp(float t, float a, float b) {

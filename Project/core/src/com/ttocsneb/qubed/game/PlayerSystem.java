@@ -8,6 +8,13 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.physics.box2d.Body;
+import com.badlogic.gdx.physics.box2d.BodyDef;
+import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
+import com.badlogic.gdx.physics.box2d.Fixture;
+import com.badlogic.gdx.physics.box2d.FixtureDef;
+import com.badlogic.gdx.physics.box2d.PolygonShape;
+import com.badlogic.gdx.physics.box2d.World;
 import com.ttocsneb.qubed.screen.GameScreen;
 
 public class PlayerSystem extends EntitySystem {
@@ -34,7 +41,10 @@ public class PlayerSystem extends EntitySystem {
 	
 	private Vector2	a, b, c, d, e;
 	
-	public PlayerSystem(GameScreen gs) {
+	private Body body;
+	private Fixture fixture;
+	
+	public PlayerSystem(GameScreen gs, World world) {
 		game = gs;
 		
 		a = new Vector2();
@@ -43,6 +53,75 @@ public class PlayerSystem extends EntitySystem {
 		d = new Vector2();
 		e = new Vector2();
 		
+		
+		initBody(world);
+	}
+	
+	/**
+	 * Initialize the body for the main character.
+	 * @param world the Box2D world to create the body in.
+	 */
+	private void initBody(World world) {
+		BodyDef bdef = new BodyDef();
+		bdef.type = BodyType.KinematicBody;
+		bdef.position.set(0, 0);
+		body = world.createBody(bdef);
+		
+		fixture = null;
+		updateShape();
+	}
+	
+	private void updateShape() {
+		updateShape(size);
+	}
+	
+	/**
+	 * Update the body's shape.
+	 * 
+	 * (This requires destroying, and recreating the fixture)
+	 */
+	private void updateShape(float size) {
+		
+		//Remove the fixture if it exists.
+		if(fixture != null && fixture.getBody() != null) {
+			body.destroyFixture(fixture);
+		}
+
+		if(size <= 0)
+			return;
+		
+		FixtureDef fdef = new FixtureDef();
+		
+		fdef.friction = 0.7f;
+		fdef.density = 1f;
+		fdef.restitution = 0.2f;
+		
+		
+		PolygonShape shape = new PolygonShape();
+	
+		//Set the points of the shape.
+		a.set(0, size/2f);
+		b.set(a.x*MathUtils.cosDeg(240)-(a.y*MathUtils.sinDeg(240)), a.x*MathUtils.sinDeg(240)+(a.y*MathUtils.cosDeg(240)));
+		c.set(a.x*MathUtils.cosDeg(120)-(a.y*MathUtils.sinDeg(120)), a.x*MathUtils.sinDeg(120)+(a.y*MathUtils.cosDeg(120)));
+		
+		
+		//Gdx.app.debug("PlayerSystem", "A: " + a + "; B: " + b + "; C: " + c);
+		
+		float[] vert = new float[]{
+				a.x, a.y,
+				b.x, b.y,
+				c.x, c.y
+		};
+		
+		shape.set(vert);
+		
+		fdef.shape = shape;
+		
+		//Create the fixture, and add it to the 
+		fixture = body.createFixture(fdef);
+		
+		
+		shape.dispose();
 	}
 	
 	@Override
@@ -63,6 +142,21 @@ public class PlayerSystem extends EntitySystem {
 	
 	@Override
 	public void update(float delta) {
+		/*
+		 * If possible, use real physics to translate the rotation of the player's body.
+		 * For now, we are setting the rotation directly (breaking physics).
+		 * This is a temporary fix.
+		 * 
+		float nextAngle = body.getAngle() + body.getAngularVelocity()*delta;
+		float totalRotation = (MathUtils.degreesToRadians*rotation) - nextAngle;
+		while(totalRotation < -180 * MathUtils.degreesToRadians) totalRotation += 360*MathUtils.degreesToRadians;
+		while(totalRotation > 180 * MathUtils.degreesToRadians) totalRotation -= 360*MathUtils.degreesToRadians;
+		float desiredAngularVelocity = totalRotation / delta;
+		float impulse = body.getInertia() * desiredAngularVelocity;
+		body.applyAngularImpulse(impulse, true);*/
+		body.setTransform(body.getPosition(), (360-rotation)*MathUtils.degreesToRadians);
+		
+		Gdx.app.debug("PlayerSystem", "Rotation: " + rotation + "; BodyRot: " + body.getAngle() * MathUtils.radiansToDegrees);
 		
 		//////////////////////////////////////////////////////////////
 		//
@@ -99,6 +193,8 @@ public class PlayerSystem extends EntitySystem {
 			if(Math.abs(size-health) < 0.01f) {
 				size = health;
 			}
+			
+			updateShape();
 		}
 		
 		//////////////////////////////////////////////////////////////
@@ -179,6 +275,8 @@ public class PlayerSystem extends EntitySystem {
 					c.x, c.y,
 					b.x, b.y);
 			
+			//Resize the box2D triangle
+			updateShape(size - progress);
 		}
 		
 	}

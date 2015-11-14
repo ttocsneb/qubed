@@ -1,5 +1,8 @@
 package com.ttocsneb.qubed.screen;
 
+import box2dLight.PointLight;
+import box2dLight.RayHandler;
+
 import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.Gdx;
@@ -11,11 +14,14 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.physics.box2d.Box2D;
+import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
+import com.badlogic.gdx.physics.box2d.World;
 import com.ttocsneb.qubed.game.BulletSystem;
 import com.ttocsneb.qubed.game.CircleComponent;
 import com.ttocsneb.qubed.game.CircleSystem;
@@ -44,7 +50,11 @@ public class GameScreen extends AbstractGameScreen implements InputProcessor {
 	public SpriteBatch batch;
 	public ShapeRenderer shape;
 	
-	ShaderProgram pix;
+	public World world;
+	public Box2DDebugRenderer worldRenderer;
+	
+	private RayHandler lights;
+	
 
 	
 	private GlyphLayout rotate;
@@ -60,7 +70,13 @@ public class GameScreen extends AbstractGameScreen implements InputProcessor {
 
 	@Override
 	public void show() {
+		Box2D.init();
+		world = new World(new Vector2(0, 0), true);
+		worldRenderer = new Box2DDebugRenderer();
 		
+		lights = new RayHandler(world);
+		lights.setShadows(true);
+		new PointLight(lights, 512, new Color(1, 1, 1, 1), 5, 1, 1);
 		
 		initEngine();
 		
@@ -77,19 +93,20 @@ public class GameScreen extends AbstractGameScreen implements InputProcessor {
 	
 	private void initEngine() {
 		
+		
 		//Create the engine
 		engine = new Engine();
 		
 		//Activate the Engine systems.
-		player = new PlayerSystem(this);
+		player = new PlayerSystem(this, world);
 		
 
 		bullet = new BulletSystem(this);
 		
-		cube = new CubeSystem(this, player, bullet);
+		cube = new CubeSystem(this);
 		engine.addSystem(cube);
 		
-		circle = new CircleSystem(this, player);
+		circle = new CircleSystem(this);
 		engine.addSystem(circle);
 		
 
@@ -114,18 +131,6 @@ public class GameScreen extends AbstractGameScreen implements InputProcessor {
 		//Create the renderers.
 		batch = new SpriteBatch();
 		shape = new ShapeRenderer();
-		
-		pix = new ShaderProgram(Gdx.files.internal("shaders/pix.vert"), Gdx.files.internal("shaders/pix.frag"));
-
-		if(!pix.isCompiled()) {
-			throw new RuntimeException("Unable to compile shader: " + pix.getLog());
-		}
-		
-		pix.begin();
-			pix.setUniformf("u_amount", 150);
-			pix.setUniformf("u_resolution", Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-		pix.end();
-		batch.setShader(pix);
 		
 	}
 	
@@ -190,7 +195,15 @@ public class GameScreen extends AbstractGameScreen implements InputProcessor {
 			/*font.setColor(Color.BLACK);
 			font.draw(batch, rotate, 1080/2-rotate.width/2, 1920/4+rotate.height/2);*/
 		batch.end();
-
+		
+		cam.update();
+		worldRenderer.render(world, cam.combined);
+		
+		lights.setCombinedMatrix(cam);
+		lights.updateAndRender();
+		
+		world.step(delta, 6, 2);
+		
 		
 	}
 	
