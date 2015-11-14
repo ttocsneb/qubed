@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Qubed</string>
+
+    <string name="splash_desc">Splash</string>
+    <color name="blue">#3187b6</color>
+    <color name="dark_blue">#215d7d</color>
+
+</resources>
