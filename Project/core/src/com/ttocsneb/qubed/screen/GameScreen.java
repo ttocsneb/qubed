@@ -39,10 +39,10 @@ public class GameScreen extends AbstractGameScreen implements InputProcessor {
 	
 	private Engine engine;
 	
-	private CubeSystem cube;
-	private CircleSystem circle;
-	private PlayerSystem player;
-	private BulletSystem bullet;
+	public CubeSystem cube;
+	public CircleSystem circle;
+	public PlayerSystem player;
+	public BulletSystem bullet;
 	
 	private OrthographicCamera cam;
 	private OrthographicCamera hud;
@@ -76,7 +76,9 @@ public class GameScreen extends AbstractGameScreen implements InputProcessor {
 		
 		lights = new RayHandler(world);
 		lights.setShadows(true);
-		new PointLight(lights, 512, new Color(1, 1, 1, 1), 5, 1, 1);
+		lights.setAmbientLight(0.25f);
+		new PointLight(lights, 512, new Color(MathUtils.random(), MathUtils.random(), MathUtils.random(), 1), MathUtils.random(1 ,6), MathUtils.random(-3f, 3f), MathUtils.random(-3f, 3f));
+		
 		
 		initEngine();
 		
@@ -98,7 +100,7 @@ public class GameScreen extends AbstractGameScreen implements InputProcessor {
 		engine = new Engine();
 		
 		//Activate the Engine systems.
-		player = new PlayerSystem(this, world);
+		player = new PlayerSystem(this);
 		
 
 		bullet = new BulletSystem(this);

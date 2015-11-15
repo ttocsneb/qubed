@@ -1,7 +1,6 @@
 package com.ttocsneb.qubed.game;
 
 import com.badlogic.ashley.core.Engine;
-import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.EntitySystem;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
@@ -29,8 +28,6 @@ public class PlayerSystem extends EntitySystem {
 	private float size;
 	private float health;
 	
-	private Engine engine;
-	
 	private GameScreen game;
 	
 	private float coolDown = 0; 
@@ -44,7 +41,7 @@ public class PlayerSystem extends EntitySystem {
 	private Body body;
 	private Fixture fixture;
 	
-	public PlayerSystem(GameScreen gs, World world) {
+	public PlayerSystem(GameScreen gs) {
 		game = gs;
 		
 		a = new Vector2();
@@ -54,7 +51,7 @@ public class PlayerSystem extends EntitySystem {
 		e = new Vector2();
 		
 		
-		initBody(world);
+		initBody(gs.world);
 	}
 	
 	/**
@@ -126,7 +123,6 @@ public class PlayerSystem extends EntitySystem {
 	
 	@Override
 	public void addedToEngine(Engine engine) {
-		this.engine = engine;
 		health = 1;
 	}
 	
@@ -169,7 +165,6 @@ public class PlayerSystem extends EntitySystem {
 			touched = true;
 			coolDown = COOLDOWN;
 			delay = DELAY;
-			Entity bullet = new Entity();
 			BulletComponent c = new BulletComponent();
 			c.x = a.x;
 			c.y = a.y;
@@ -180,8 +175,7 @@ public class PlayerSystem extends EntitySystem {
 			c.vely = MathUtils.cosDeg(rotation);
 			c.scale = BULLETSIZE;
 			
-			bullet.add(c);
-			engine.addEntity(bullet);
+			game.bullet.addBullet(c);
 		} else if(!Gdx.input.isTouched() && touched) {
 			touched = false;
 		}
