@@ -1,5 +1,7 @@
 package com.ttocsneb.qubed.game;
 
+import box2dLight.PointLight;
+
 import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.EntitySystem;
 import com.badlogic.gdx.Gdx;
@@ -41,6 +43,8 @@ public class PlayerSystem extends EntitySystem {
 	private Body body;
 	private Fixture fixture;
 	
+	private PointLight light;
+	
 	public PlayerSystem(GameScreen gs) {
 		game = gs;
 		
@@ -74,8 +78,6 @@ public class PlayerSystem extends EntitySystem {
 	
 	/**
 	 * Update the body's shape.
-	 * 
-	 * (This requires destroying, and recreating the fixture)
 	 */
 	private void updateShape(float size) {
 		
@@ -160,6 +162,10 @@ public class PlayerSystem extends EntitySystem {
 		//
 		/////////////////////////////////////////////////////////////
 		
+		if(size < 0.1f) {
+			health = 1;
+		}
+		
 		//Shoot
 		if(size > 0.1 && coolDown <= 0 && Gdx.input.isTouched() && !touched) {
 			touched = true;
@@ -175,9 +181,21 @@ public class PlayerSystem extends EntitySystem {
 			c.vely = MathUtils.cosDeg(rotation);
 			c.scale = BULLETSIZE;
 			
+			light = new PointLight(game.lights, 512, new Color(1, 1, 1, 0.75f).mul(Color.WHITE), 5,
+					a.x + 0.05f * MathUtils.sinDeg(rotation), a.y + 0.05f * MathUtils.cosDeg(rotation));
+			
 			game.bullet.addBullet(c);
 		} else if(!Gdx.input.isTouched() && touched) {
 			touched = false;
+		}
+		
+		if(light != null) {
+			light.setDistance(light.getDistance() - delta*10);
+			
+			if(light.getDistance() <= 0.1f) {
+				light.remove();
+				light = null;
+			}
 		}
 		
 		//Health

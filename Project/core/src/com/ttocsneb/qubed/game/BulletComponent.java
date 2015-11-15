@@ -7,6 +7,8 @@ public class BulletComponent implements Component {
 
 	public Body body;
 	
+	public boolean die;
+	
 	public float x = 0;
 	public float y = 0;
 

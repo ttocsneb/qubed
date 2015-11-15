@@ -1,10 +1,9 @@
 package com.ttocsneb.qubed.screen;
 
-import box2dLight.PointLight;
+import box2dLight.DirectionalLight;
 import box2dLight.RayHandler;
 
 import com.badlogic.ashley.core.Engine;
-import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.InputProcessor;
@@ -25,7 +24,6 @@ import com.badlogic.gdx.physics.box2d.World;
 import com.ttocsneb.qubed.game.BulletSystem;
 import com.ttocsneb.qubed.game.CircleComponent;
 import com.ttocsneb.qubed.game.CircleSystem;
-import com.ttocsneb.qubed.game.CubeComponent;
 import com.ttocsneb.qubed.game.CubeSystem;
 import com.ttocsneb.qubed.game.PlayerSystem;
 import com.ttocsneb.qubed.screen.transitions.ScreenTransition;
@@ -53,7 +51,7 @@ public class GameScreen extends AbstractGameScreen implements InputProcessor {
 	public World world;
 	public Box2DDebugRenderer worldRenderer;
 	
-	private RayHandler lights;
+	public RayHandler lights;
 	
 
 	
@@ -73,11 +71,15 @@ public class GameScreen extends AbstractGameScreen implements InputProcessor {
 		Box2D.init();
 		world = new World(new Vector2(0, 0), true);
 		worldRenderer = new Box2DDebugRenderer();
-		
+
+		RayHandler.setGammaCorrection(false);
 		lights = new RayHandler(world);
 		lights.setShadows(true);
-		lights.setAmbientLight(0.25f);
-		new PointLight(lights, 512, new Color(MathUtils.random(), MathUtils.random(), MathUtils.random(), 1), MathUtils.random(1 ,6), MathUtils.random(-3f, 3f), MathUtils.random(-3f, 3f));
+		lights.setAmbientLight(0.125f);
+		//lights.setLightMapRendering(false);
+		//new PointLight(lights, 512, new Color(MathUtils.random(), MathUtils.random(), MathUtils.random(), 1), MathUtils.random(1 ,6), MathUtils.random(-3f, 3f), MathUtils.random(-3f, 3f));
+		//new PointLight(lights, 512, Color.RED, 6, 0, -1);
+		new DirectionalLight(lights, 1024, new Color(1, 1, 1, 0.5f), -45);
 		
 		
 		initEngine();
@@ -176,6 +178,9 @@ public class GameScreen extends AbstractGameScreen implements InputProcessor {
 		
 		
 		cam.update();
+		
+		Gdx.gl.glEnable(GL20.GL_BLEND);
+		Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
 		shape.setProjectionMatrix(cam.combined);
 		shape.begin(ShapeType.Filled);
 			
@@ -188,29 +193,38 @@ public class GameScreen extends AbstractGameScreen implements InputProcessor {
 
 
 			engine.update(delta);
-
+			
 		shape.end();
+		Gdx.gl.glDisable(GL20.GL_BLEND);
+
+		lights.setCombinedMatrix(cam);
+		lights.updateAndRender();
+		//worldRenderer.render(world, cam.combined);
+		
 		
 		hud.update();
 		batch.setProjectionMatrix(hud.combined);
 		batch.begin();
 			/*font.setColor(Color.BLACK);
 			font.draw(batch, rotate, 1080/2-rotate.width/2, 1920/4+rotate.height/2);*/
+
+			//batch.draw(lights.getLightMapTexture(), 0, 0);
 		batch.end();
 		
 		cam.update();
-		worldRenderer.render(world, cam.combined);
-		
-		lights.setCombinedMatrix(cam);
-		lights.updateAndRender();
 		
 		world.step(delta, 6, 2);
 		
 		
 	}
 	
+	@Deprecated
+	/**
+	 * Temporarily unusable as the qube is not yet implemented.
+	 */
 	private void spawnCube() {
-		Entity e = new Entity();
+		return;
+		/*Entity e = new Entity();
 		CubeComponent cubeComp = new CubeComponent();
 		int rot = MathUtils.random(360);
 		cubeComp.x = 2.9f * MathUtils.cosDeg(rot);
@@ -222,23 +236,20 @@ public class GameScreen extends AbstractGameScreen implements InputProcessor {
 		cubeComp.color = selectColor();
 		e.add(cubeComp);
 		
-		engine.addEntity(e);
+		engine.addEntity(e);*/
 	}
 	
 	private void spawnCircle() {
-		Entity e = new Entity();
 		CircleComponent circComp = new CircleComponent();
 		int rot = MathUtils.random(360);
 		circComp.x = 2.9f * MathUtils.cosDeg(rot);
 		circComp.y = 2.9f * MathUtils.sinDeg(rot);
 		circComp.direction = rot-180 < 0 ? rot+180 : rot-180;
-		circComp.velocity = MathUtils.random(0.5f, 2);
-		circComp.scale = MathUtils.random(0.5f, 1.25f);
+		circComp.velocity = MathUtils.random(0.5f, 1);
+		circComp.scale = MathUtils.random(0.25f, 0.75f);
 		circComp.rotation = MathUtils.randomBoolean();
 		circComp.color = selectColor();
-		e.add(circComp);
-		
-		engine.addEntity(e);
+		circle.addCircle(circComp);
 	}
 
 	@Override
