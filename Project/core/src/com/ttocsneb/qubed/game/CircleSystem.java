@@ -1,20 +1,23 @@
 package com.ttocsneb.qubed.game;
 
+import com.badlogic.ashley.core.Component;
 import com.badlogic.ashley.core.ComponentMapper;
 import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.EntitySystem;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.utils.ImmutableArray;
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
 import com.badlogic.gdx.physics.box2d.CircleShape;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
+import com.ttocsneb.qubed.game.contact.ContactListener;
 import com.ttocsneb.qubed.screen.GameScreen;
 
-public class CircleSystem extends EntitySystem {
+public class CircleSystem extends EntitySystem implements ContactListener {
 	
 	private ImmutableArray<Entity> entities;
 	private ComponentMapper<CircleComponent> cc = ComponentMapper.getFor(CircleComponent.class);
@@ -130,10 +133,31 @@ public class CircleSystem extends EntitySystem {
 		bdef.position.set(cc.x, cc.y);
 		
 		cc.body = game.world.createBody(bdef);
+		cc.body.setUserData(cc);
 		
 		cc.body.setLinearVelocity(cc.velocity * MathUtils.cosDeg(cc.direction), cc.velocity * MathUtils.sinDeg(cc.direction));
 		
 		updateShape(cc, cc.scale);
+	}
+
+
+	
+
+	@Override
+	public void beginContact(Component object, Object object2) {
+		Gdx.app.debug("CircleSystem:", "Contact");
+		
+	}
+	
+	@Override
+	public void endContact(Component object, Object object2) {
+		Gdx.app.debug("CircleSystem", "End Contact");
+		
+	}
+
+	@Override
+	public Class<?> getComponentType() {
+		return CircleComponent.class;
 	}
 	
 }

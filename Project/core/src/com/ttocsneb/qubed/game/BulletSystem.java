@@ -1,11 +1,13 @@
 package com.ttocsneb.qubed.game;
 
+import com.badlogic.ashley.core.Component;
 import com.badlogic.ashley.core.ComponentMapper;
 import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.EntitySystem;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.utils.ImmutableArray;
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
@@ -13,9 +15,10 @@ import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
+import com.ttocsneb.qubed.game.contact.ContactListener;
 import com.ttocsneb.qubed.screen.GameScreen;
 
-public class BulletSystem extends EntitySystem {
+public class BulletSystem extends EntitySystem implements ContactListener{
 	
 	private ImmutableArray<Entity> entities;
 	
@@ -94,6 +97,7 @@ public class BulletSystem extends EntitySystem {
 		bdef.angle = (360 - bc.rotation) * MathUtils.degreesToRadians;
 		
 		bc.body = game.world.createBody(bdef);
+		bc.body.setUserData(bc);
 		
 		FixtureDef fdef = new FixtureDef();
 		
@@ -118,6 +122,22 @@ public class BulletSystem extends EntitySystem {
 		bc.body.createFixture(fdef);
 		
 		bc.body.setLinearVelocity(new Vector2(bc.velx, bc.vely));
+		
+	}
+
+	@Override
+	public Class<?> getComponentType() {
+		return BulletComponent.class;
+	}
+
+	@Override
+	public void beginContact(Component object, Object object2) {
+		Gdx.app.debug("BulletSystem", "Contact");
+	}
+
+	@Override
+	public void endContact(Component object, Object object2) {
+		Gdx.app.debug("BulletSystem", "EndContact");
 		
 	}
 	

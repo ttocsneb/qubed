@@ -154,7 +154,7 @@ public class PlayerSystem extends EntitySystem {
 		body.applyAngularImpulse(impulse, true);*/
 		body.setTransform(body.getPosition(), (360-rotation)*MathUtils.degreesToRadians);
 		
-		Gdx.app.debug("PlayerSystem", "Rotation: " + rotation + "; BodyRot: " + body.getAngle() * MathUtils.radiansToDegrees);
+		//Gdx.app.debug("PlayerSystem", "Rotation: " + rotation + "; BodyRot: " + body.getAngle() * MathUtils.radiansToDegrees);
 		
 		//////////////////////////////////////////////////////////////
 		//
@@ -181,7 +181,7 @@ public class PlayerSystem extends EntitySystem {
 			c.vely = MathUtils.cosDeg(rotation);
 			c.scale = BULLETSIZE;
 			
-			light = new PointLight(game.lights, 512, new Color(1, 1, 1, 0.75f).mul(Color.WHITE), 5,
+			light = new PointLight(game.lights, 512, new Color(1, 1, 1, 0.1f), 1,
 					a.x + 0.05f * MathUtils.sinDeg(rotation), a.y + 0.05f * MathUtils.cosDeg(rotation));
 			
 			game.bullet.addBullet(c);
@@ -190,7 +190,7 @@ public class PlayerSystem extends EntitySystem {
 		}
 		
 		if(light != null) {
-			light.setDistance(light.getDistance() - delta*10);
+			light.setDistance(light.getDistance() - delta*5);
 			
 			if(light.getDistance() <= 0.1f) {
 				light.remove();

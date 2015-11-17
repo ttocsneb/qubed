@@ -26,6 +26,7 @@ import com.ttocsneb.qubed.game.CircleComponent;
 import com.ttocsneb.qubed.game.CircleSystem;
 import com.ttocsneb.qubed.game.CubeSystem;
 import com.ttocsneb.qubed.game.PlayerSystem;
+import com.ttocsneb.qubed.game.contact.ContactManager;
 import com.ttocsneb.qubed.screen.transitions.ScreenTransition;
 import com.ttocsneb.qubed.screen.transitions.ScreenTransitionSlide;
 import com.ttocsneb.qubed.util.Assets;
@@ -41,6 +42,8 @@ public class GameScreen extends AbstractGameScreen implements InputProcessor {
 	public CircleSystem circle;
 	public PlayerSystem player;
 	public BulletSystem bullet;
+	
+	ContactManager contactManager;
 	
 	private OrthographicCamera cam;
 	private OrthographicCamera hud;
@@ -72,14 +75,14 @@ public class GameScreen extends AbstractGameScreen implements InputProcessor {
 		world = new World(new Vector2(0, 0), true);
 		worldRenderer = new Box2DDebugRenderer();
 
-		RayHandler.setGammaCorrection(false);
+		RayHandler.setGammaCorrection(true);
 		lights = new RayHandler(world);
 		lights.setShadows(true);
-		lights.setAmbientLight(0.125f);
+		lights.setAmbientLight(0.9f);
 		//lights.setLightMapRendering(false);
 		//new PointLight(lights, 512, new Color(MathUtils.random(), MathUtils.random(), MathUtils.random(), 1), MathUtils.random(1 ,6), MathUtils.random(-3f, 3f), MathUtils.random(-3f, 3f));
 		//new PointLight(lights, 512, Color.RED, 6, 0, -1);
-		new DirectionalLight(lights, 1024, new Color(1, 1, 1, 0.5f), -45);
+		new DirectionalLight(lights, 1024, new Color(1, 1, 1, 0.1f), -45);
 		
 		
 		initEngine();
@@ -117,6 +120,10 @@ public class GameScreen extends AbstractGameScreen implements InputProcessor {
 		engine.addSystem(player);
 		
 		engine.addSystem(bullet);
+		
+		
+		contactManager = new ContactManager(circle, bullet);
+		world.setContactListener(contactManager);
 		
 	}
 	
@@ -214,6 +221,7 @@ public class GameScreen extends AbstractGameScreen implements InputProcessor {
 		cam.update();
 		
 		world.step(delta, 6, 2);
+		contactManager.update();
 		
 		
 	}
