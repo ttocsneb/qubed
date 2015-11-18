@@ -4,6 +4,7 @@ import box2dLight.DirectionalLight;
 import box2dLight.RayHandler;
 
 import com.badlogic.ashley.core.Engine;
+import com.badlogic.gdx.Application.ApplicationType;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.InputProcessor;
@@ -24,6 +25,7 @@ import com.badlogic.gdx.physics.box2d.World;
 import com.ttocsneb.qubed.game.BulletSystem;
 import com.ttocsneb.qubed.game.CircleComponent;
 import com.ttocsneb.qubed.game.CircleSystem;
+import com.ttocsneb.qubed.game.CubeComponent;
 import com.ttocsneb.qubed.game.CubeSystem;
 import com.ttocsneb.qubed.game.PlayerSystem;
 import com.ttocsneb.qubed.game.contact.ContactManager;
@@ -64,6 +66,7 @@ public class GameScreen extends AbstractGameScreen implements InputProcessor {
 	
 	private float orientation;
 	private float rotation;
+	private boolean debug;
 	
 	public GameScreen(DirectedGame game) {
 		super(game);
@@ -122,7 +125,7 @@ public class GameScreen extends AbstractGameScreen implements InputProcessor {
 		engine.addSystem(bullet);
 		
 		
-		contactManager = new ContactManager(circle, bullet);
+		contactManager = new ContactManager(circle, bullet, cube);
 		world.setContactListener(contactManager);
 		
 	}
@@ -155,12 +158,20 @@ public class GameScreen extends AbstractGameScreen implements InputProcessor {
 		}
 	}
 
+	private float lerp(float t, float a, float b) {
+		return (a + t*(b-a));
+	}
+	
 	@Override
 	public void render(float delta) {
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT | 
 				(Gdx.graphics.getBufferFormat().coverageSampling?GL20.GL_COVERAGE_BUFFER_BIT_NV:0));
 
-		orientation = Math.max(Math.min(Gdx.input.getAccelerometerX(), 5), -5);
+		if(Gdx.app.getType() != ApplicationType.Desktop) {
+			orientation = Math.max(Math.min(Gdx.input.getAccelerometerX(), 5), -5);
+		} else {
+			orientation = lerp(delta*2, orientation, MathUtils.clamp((Gdx.input.isKeyPressed(Keys.A) ? 5 : Gdx.input.isKeyPressed(Keys.D) ? -5 : -orientation), -5, 5));
+		}
 		if(Math.abs(orientation) > 0.5) { 
 			cam.rotate(orientation);
 			rotation += orientation;
@@ -206,7 +217,9 @@ public class GameScreen extends AbstractGameScreen implements InputProcessor {
 
 		lights.setCombinedMatrix(cam);
 		lights.updateAndRender();
-		//worldRenderer.render(world, cam.combined);
+		
+		if(debug == true)
+		worldRenderer.render(world, cam.combined);
 		
 		
 		hud.update();
@@ -226,25 +239,18 @@ public class GameScreen extends AbstractGameScreen implements InputProcessor {
 		
 	}
 	
-	@Deprecated
-	/**
-	 * Temporarily unusable as the qube is not yet implemented.
-	 */
 	private void spawnCube() {
-		return;
-		/*Entity e = new Entity();
 		CubeComponent cubeComp = new CubeComponent();
 		int rot = MathUtils.random(360);
 		cubeComp.x = 2.9f * MathUtils.cosDeg(rot);
 		cubeComp.y = 2.9f * MathUtils.sinDeg(rot);
 		cubeComp.direction = rot-180 < 0 ? rot+180 : rot-180;
 		cubeComp.velocity = MathUtils.random(0.5f, 2);
-		cubeComp.scale = MathUtils.random(0.5f, 1.25f);
-		cubeComp.rotation = MathUtils.randomBoolean();
+		cubeComp.scale = MathUtils.random(0.5f, 0.9f);
 		cubeComp.color = selectColor();
-		e.add(cubeComp);
 		
-		engine.addEntity(e);*/
+		cube.addCube(cubeComp);
+		
 	}
 	
 	private void spawnCircle() {
@@ -255,7 +261,6 @@ public class GameScreen extends AbstractGameScreen implements InputProcessor {
 		circComp.direction = rot-180 < 0 ? rot+180 : rot-180;
 		circComp.velocity = MathUtils.random(0.5f, 1);
 		circComp.scale = MathUtils.random(0.25f, 0.75f);
-		circComp.rotation = MathUtils.randomBoolean();
 		circComp.color = selectColor();
 		circle.addCircle(circComp);
 	}
@@ -293,6 +298,16 @@ public class GameScreen extends AbstractGameScreen implements InputProcessor {
 			ScreenTransition transition = ScreenTransitionSlide.init(
 					0.5f, ScreenTransitionSlide.RIGHT, false, Interpolation.pow2);
 			game.setScreen(new MenuScreen(game), transition);
+		} 
+		
+		if(Gdx.app.getType() == ApplicationType.Desktop) {
+			if(keycode == Keys.E) {
+				debug = !debug;
+			} else if(keycode == Keys.Q) {
+				ScreenTransition transition = ScreenTransitionSlide.init(
+						0.5f, ScreenTransitionSlide.RIGHT, false, Interpolation.pow2);
+				game.setScreen(new MenuScreen(game), transition);
+			}
 		}
 		return false;
 	}

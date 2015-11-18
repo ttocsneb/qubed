@@ -118,7 +118,7 @@ public class CircleSystem extends EntitySystem implements ContactListener {
 	/**
 	 * Add a Circle to the System.  
 	 * 
-	 * @Note Not using this function without initializing a Body will result in the game crashing.
+	 * @Warning Not using this function without initializing a Body will result in the game crashing.
 	 * 
 	 * @param cc
 	 */

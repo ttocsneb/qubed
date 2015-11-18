@@ -181,7 +181,7 @@ public class PlayerSystem extends EntitySystem {
 			c.vely = MathUtils.cosDeg(rotation);
 			c.scale = BULLETSIZE;
 			
-			light = new PointLight(game.lights, 512, new Color(1, 1, 1, 0.1f), 1,
+			light = new PointLight(game.lights, 512, new Color(1, 1, 1, 0.f).mul(Color.CYAN), 1,
 					a.x + 0.05f * MathUtils.sinDeg(rotation), a.y + 0.05f * MathUtils.cosDeg(rotation));
 			
 			game.bullet.addBullet(c);

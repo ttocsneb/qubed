@@ -59,8 +59,8 @@ public class BulletSystem extends EntitySystem implements ContactListener{
 			if(bullet.die) {
 				bullet.scale -= delta;
 				if(bullet.scale <= 0) {
-					game.world.destroyBody(bullet.body);
 					engine.removeEntity(entity);
+					game.world.destroyBody(bullet.body);
 					continue;
 				}
 			}
@@ -94,7 +94,7 @@ public class BulletSystem extends EntitySystem implements ContactListener{
 		BodyDef bdef = new BodyDef();
 		bdef.type = BodyType.DynamicBody;
 		bdef.position.set(bc.x, bc.y);
-		bdef.angle = (360 - bc.rotation) * MathUtils.degreesToRadians;
+		bdef.angle = (360-bc.rotation) * MathUtils.degreesToRadians;
 		
 		bc.body = game.world.createBody(bdef);
 		bc.body.setUserData(bc);

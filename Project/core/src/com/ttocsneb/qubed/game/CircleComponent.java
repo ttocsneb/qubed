@@ -16,9 +16,6 @@ public class CircleComponent implements Component {
 	public float direction;
 	public float velocity;
 	
-	public float progress;
-	public boolean rotation;
-	
 	public float scale = 1;
 	
 	public Color color;
