@@ -4,24 +4,38 @@ size: 256,128
 format: RGBA8888
 filter: Nearest,Nearest
 repeat: none
-Background
+circleParticle
   rotate: false
-  xy: 2, 2
-  size: 16, 16
-  orig: 16, 16
+  xy: 206, 70
+  size: 32, 32
+  orig: 32, 32
   offset: 0, 0
   index: -1
 speaker_off
   rotate: false
-  xy: 2, 20
+  xy: 2, 2
   size: 100, 100
   orig: 100, 100
   offset: 0, 0
   index: -1
 speaker_on
   rotate: false
-  xy: 104, 20
+  xy: 104, 2
   size: 100, 100
   orig: 100, 100
+  offset: 0, 0
+  index: -1
+squareParticle
+  rotate: false
+  xy: 206, 36
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
+triangleParticle
+  rotate: false
+  xy: 206, 2
+  size: 32, 32
+  orig: 32, 32
   offset: 0, 0
   index: -1
