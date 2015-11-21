@@ -7,15 +7,16 @@ import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.EntitySystem;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.utils.ImmutableArray;
-import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.g2d.ParticleEffectPool;
+import com.badlogic.gdx.graphics.g2d.ParticleEffectPool.PooledEffect;
 import com.badlogic.gdx.math.MathUtils;
-import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.ttocsneb.qubed.game.contact.ContactListener;
 import com.ttocsneb.qubed.screen.GameScreen;
+import com.ttocsneb.qubed.util.Assets;
 
 public class CubeSystem extends EntitySystem implements ContactListener{
     private ImmutableArray<Entity> entities;
@@ -25,18 +26,13 @@ public class CubeSystem extends EntitySystem implements ContactListener{
 	private GameScreen game;
 	private Engine engine;
 	
-	private float interpolation;
+	private ParticleEffectPool squareEffect;
 	
-	private Vector2 a, b, c, d;
 	
 	public CubeSystem(GameScreen gs) {
 		game = gs;
-		interpolation = 0;
 		
-		a = new Vector2();
-		b = new Vector2();
-		c = new Vector2();
-		d = new Vector2();
+		squareEffect = new ParticleEffectPool(Assets.instance.particles.squareExp, 1, 5);
 	}
 
 	@Override
@@ -44,6 +40,7 @@ public class CubeSystem extends EntitySystem implements ContactListener{
 	public void addedToEngine(Engine engine) {
 		entities = engine.getEntitiesFor(Family.all(CubeComponent.class).get());
 		this.engine = engine;
+		
 	}
 	
 	@Override
@@ -174,6 +171,7 @@ public class CubeSystem extends EntitySystem implements ContactListener{
 		updateShape(cc, cc.scale);
 	}
 	
+	@SuppressWarnings("unused")
 	private float lerp(float t, float a, float b) {
 		return (a + t*(b-a));
 	}
@@ -185,12 +183,24 @@ public class CubeSystem extends EntitySystem implements ContactListener{
 
 	@Override
 	public void beginContact(Component object, Object object2) {
-		Gdx.app.debug("CubeSystem", "Begin Contact");
+		CubeComponent cc = (CubeComponent) object;
+		
+		//Die if the Cube comes into contact with a bullet.
+		if(object2 instanceof BulletComponent) {
+			((BulletComponent) object2).die = true;
+			cc.die = true;
+			
+			PooledEffect effect = squareEffect.obtain();
+			effect.setPosition(cc.x, cc.y);
+			effect.getEmitters().get(0).getTint().setColors(new float[]{cc.color.r, cc.color.g, cc.color.b});
+			effect.getEmitters().get(0).getScale().setHigh(cc.scale);
+			game.particle.addEffect(effect);
+		}
 	}
 
 	@Override
 	public void endContact(Component object, Object object2) {
-		Gdx.app.debug("CubeSystem", "End Contact");
+
 		
 	}
 

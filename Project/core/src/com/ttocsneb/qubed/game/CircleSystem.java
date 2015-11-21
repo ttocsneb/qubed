@@ -7,7 +7,8 @@ import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.EntitySystem;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.utils.ImmutableArray;
-import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.g2d.ParticleEffectPool;
+import com.badlogic.gdx.graphics.g2d.ParticleEffectPool.PooledEffect;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.BodyDef;
@@ -16,6 +17,7 @@ import com.badlogic.gdx.physics.box2d.CircleShape;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.ttocsneb.qubed.game.contact.ContactListener;
 import com.ttocsneb.qubed.screen.GameScreen;
+import com.ttocsneb.qubed.util.Assets;
 
 public class CircleSystem extends EntitySystem implements ContactListener {
 	
@@ -25,10 +27,11 @@ public class CircleSystem extends EntitySystem implements ContactListener {
 	private GameScreen game;
 	private Engine engine;
 	
+	private ParticleEffectPool circleEffect;
 	
 	public CircleSystem(GameScreen gs) {
 		game = gs;
-		
+		circleEffect = new ParticleEffectPool(Assets.instance.particles.circleExp, 1, 5);
 		
 	}
 	
@@ -145,13 +148,22 @@ public class CircleSystem extends EntitySystem implements ContactListener {
 
 	@Override
 	public void beginContact(Component object, Object object2) {
-		Gdx.app.debug("CircleSystem:", "Contact");
+		CircleComponent cc = (CircleComponent) object;
 		
+		//Die if the Circle comes into contact with a bullet.
+		if(object2 instanceof BulletComponent) {
+			((BulletComponent) object2).die = true;
+			cc.die = true;
+			PooledEffect effect = circleEffect.obtain();
+			effect.setPosition(cc.x, cc.y);
+			effect.getEmitters().get(0).getTint().setColors(new float[]{cc.color.r, cc.color.g, cc.color.b});
+			effect.getEmitters().get(0).getScale().setHigh(cc.scale);
+			game.particle.addEffect(effect);
+		}
 	}
 	
 	@Override
 	public void endContact(Component object, Object object2) {
-		Gdx.app.debug("CircleSystem", "End Contact");
 		
 	}
 

@@ -27,6 +27,7 @@ import com.ttocsneb.qubed.game.CircleComponent;
 import com.ttocsneb.qubed.game.CircleSystem;
 import com.ttocsneb.qubed.game.CubeComponent;
 import com.ttocsneb.qubed.game.CubeSystem;
+import com.ttocsneb.qubed.game.ParticleSystem;
 import com.ttocsneb.qubed.game.PlayerSystem;
 import com.ttocsneb.qubed.game.contact.ContactManager;
 import com.ttocsneb.qubed.screen.transitions.ScreenTransition;
@@ -44,6 +45,7 @@ public class GameScreen extends AbstractGameScreen implements InputProcessor {
 	public CircleSystem circle;
 	public PlayerSystem player;
 	public BulletSystem bullet;
+	public ParticleSystem particle;
 	
 	ContactManager contactManager;
 	
@@ -82,9 +84,6 @@ public class GameScreen extends AbstractGameScreen implements InputProcessor {
 		lights = new RayHandler(world);
 		lights.setShadows(true);
 		lights.setAmbientLight(0.9f);
-		//lights.setLightMapRendering(false);
-		//new PointLight(lights, 512, new Color(MathUtils.random(), MathUtils.random(), MathUtils.random(), 1), MathUtils.random(1 ,6), MathUtils.random(-3f, 3f), MathUtils.random(-3f, 3f));
-		//new PointLight(lights, 512, Color.RED, 6, 0, -1);
 		new DirectionalLight(lights, 1024, new Color(1, 1, 1, 0.1f), -45);
 		
 		
@@ -123,6 +122,8 @@ public class GameScreen extends AbstractGameScreen implements InputProcessor {
 		engine.addSystem(player);
 		
 		engine.addSystem(bullet);
+		
+		particle = new ParticleSystem(this);
 		
 		
 		contactManager = new ContactManager(circle, bullet, cube);
@@ -193,7 +194,9 @@ public class GameScreen extends AbstractGameScreen implements InputProcessor {
 				spawnCircle();
 			}
 		}
-		
+
+		world.step(delta, 6, 2);
+		contactManager.update();
 		
 		cam.update();
 		
@@ -215,6 +218,11 @@ public class GameScreen extends AbstractGameScreen implements InputProcessor {
 		shape.end();
 		Gdx.gl.glDisable(GL20.GL_BLEND);
 
+		batch.setProjectionMatrix(cam.combined);
+		batch.begin();
+			particle.update(delta);
+		batch.end();
+		
 		lights.setCombinedMatrix(cam);
 		lights.updateAndRender();
 		
@@ -231,10 +239,6 @@ public class GameScreen extends AbstractGameScreen implements InputProcessor {
 			//batch.draw(lights.getLightMapTexture(), 0, 0);
 		batch.end();
 		
-		cam.update();
-		
-		world.step(delta, 6, 2);
-		contactManager.update();
 		
 		
 	}

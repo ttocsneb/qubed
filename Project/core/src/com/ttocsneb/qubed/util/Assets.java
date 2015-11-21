@@ -8,6 +8,7 @@ import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.Texture.TextureFilter;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.ParticleEffect;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas.AtlasRegion;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
@@ -26,6 +27,7 @@ public class Assets implements Disposable, AssetErrorListener {
 	public AssetSounds sounds;
 	public AssetFonts fonts;
 	public AssetAtlas atlases;
+	public AssetParticles particles;
 	
 	private static final String[] ATLASES = {"skins/uiskin.atlas"};
 	public class AssetAtlas {
@@ -53,6 +55,23 @@ public class Assets implements Disposable, AssetErrorListener {
 			
 			speaker = atlas.findRegion("speaker_on");
 			speakerOff = atlas.findRegion("speaker_off");
+		}
+	}
+	
+	public class AssetParticles {
+		public final ParticleEffect triangleExp;
+		public final ParticleEffect squareExp;
+		public final ParticleEffect circleExp;
+		
+		public AssetParticles(TextureAtlas atlas) {
+			triangleExp = new ParticleEffect();
+			triangleExp.load(Gdx.files.internal("particles/explosionTriangle.p"), atlas);
+
+			squareExp = new ParticleEffect();
+			squareExp.load(Gdx.files.internal("particles/explosionSquare.p"), atlas);
+
+			circleExp = new ParticleEffect();
+			circleExp.load(Gdx.files.internal("particles/explosionCircle.p"), atlas);
 		}
 	}
 	
@@ -155,6 +174,7 @@ public class Assets implements Disposable, AssetErrorListener {
 		sounds = new AssetSounds(assetManager);
 		textures = new AssetTextures(atlas);
 		atlases = new AssetAtlas(assetManager);
+		particles = new AssetParticles(atlas);
 		
 	
 

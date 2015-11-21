@@ -10,7 +10,7 @@ import com.ttocsneb.qubed.Main;
 
 public class DesktopLauncher {
 	
-	private static final boolean pack = true, debug = true;
+	private static final boolean pack = true, debug = false;
 	private static final String textureDir = "textureRaw";
 	
 	public static void main (String[] arg) {
