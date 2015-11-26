@@ -7,14 +7,13 @@ import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.EntitySystem;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.utils.ImmutableArray;
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.BodyDef;
-import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
+import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.ttocsneb.qubed.game.contact.ContactListener;
 import com.ttocsneb.qubed.screen.GameScreen;
 
@@ -132,12 +131,11 @@ public class BulletSystem extends EntitySystem implements ContactListener{
 
 	@Override
 	public void beginContact(Component object, Object object2) {
-		Gdx.app.debug("BulletSystem", "Contact");
+		
 	}
 
 	@Override
 	public void endContact(Component object, Object object2) {
-		Gdx.app.debug("BulletSystem", "EndContact");
 		
 	}
 	

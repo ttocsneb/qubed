@@ -1,6 +1,7 @@
 package com.ttocsneb.qubed.game.contact;
 
 import com.badlogic.ashley.core.Component;
+import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.Contact;
 import com.badlogic.gdx.physics.box2d.ContactImpulse;
 import com.badlogic.gdx.physics.box2d.Manifold;
@@ -17,8 +18,8 @@ public class ContactManager implements com.badlogic.gdx.physics.box2d.ContactLis
 
 	private final ContactListener[] contactListeners;
 	
-	private Array<Contact> beginContact;
-	private Array<Contact> endContact;
+	private Array<Cont> beginContact;
+	private Array<Cont> endContact;
 	
 	/**
 	 * Create a new Contact Manager.
@@ -26,8 +27,18 @@ public class ContactManager implements com.badlogic.gdx.physics.box2d.ContactLis
 	 */
 	public ContactManager(ContactListener... contact) {
 		contactListeners = contact;
-		beginContact = new Array<Contact>();
-		endContact = new Array<Contact>();
+		beginContact = new Array<Cont>();
+		endContact = new Array<Cont>();
+	}
+	
+	private class Cont {
+		private final Body body1;
+		private final Body body2;
+		
+		private Cont(Body b1, Body b2) {
+			body1 = b1;
+			body2 = b2;
+		}
 	}
 	
 	/**
@@ -35,41 +46,37 @@ public class ContactManager implements com.badlogic.gdx.physics.box2d.ContactLis
 	 */
 	public void update() {
 		
-		Component a;
-		Component b;
+		Object a;
+		Object b;
 		
 		//Notify listeners for begin Contact.
 		//go through every contact
-		for(Contact c : beginContact) {
-			a = (Component) c.getFixtureA().getBody().getUserData();
-			b = (Component) c.getFixtureB().getBody().getUserData();
+		for(Cont c : beginContact) {
+			a = c.body1.getUserData();
+			b = c.body2.getUserData();
 			//Go through every listener 
 			for(ContactListener cl : contactListeners) {
 				//Check if the contact was made by the selected listener, and notify it.
 				if(a != null && a.getClass().equals(cl.getComponentType())) {
-					cl.beginContact(a, b);
-					continue;
+					cl.beginContact((Component) a, b);
 				} else if(b != null && b.getClass().equals(cl.getComponentType())) {
-					cl.beginContact(b, a);
-					continue;
+					cl.beginContact((Component) b, a);
 				}
 			}
 		}
 		
 		//Notify listeners for end Contact.
 		//go through every contact
-		for(Contact c : beginContact) {
-			a = (Component) c.getFixtureA().getBody().getUserData();
-			b = (Component) c.getFixtureB().getBody().getUserData();
+		for(Cont c : endContact) {
+			a = c.body1.getUserData();
+			b = c.body2.getUserData();
 			//Go through every listener 
 			for(ContactListener cl : contactListeners) {
 				//Check if the contact was made by the selected listener, and notify it.
 				if(a != null && a.getClass().equals(cl.getComponentType())) {
-					cl.endContact(a, b);
-					continue;
+					cl.endContact((Component) a, b);
 				} else if(b != null && b.getClass().equals(cl.getComponentType())) {
-					cl.endContact(b, a);
-					continue;
+					cl.endContact((Component) b, a);
 				}
 			}
 		}
@@ -89,10 +96,10 @@ public class ContactManager implements com.badlogic.gdx.physics.box2d.ContactLis
 		for(ContactListener cl : contactListeners) {
 			//Check if the contact belongs to the selected listener.
 			if(a != null && a.getClass().equals(cl.getComponentType())) {
-				beginContact.add(contact);
+				beginContact.add(new Cont(contact.getFixtureA().getBody(), contact.getFixtureB().getBody()));
 				return;
 			} else if(b != null && b.getClass().equals(cl.getComponentType())) {
-				beginContact.add(contact);
+				beginContact.add(new Cont(contact.getFixtureA().getBody(), contact.getFixtureB().getBody()));
 				return;
 			}
 		}
@@ -109,10 +116,10 @@ public class ContactManager implements com.badlogic.gdx.physics.box2d.ContactLis
 		for(ContactListener cl : contactListeners) {
 			//Check if the contact belongs to the selected listener.
 			if(a != null && a.getClass().equals(cl.getComponentType())) {
-				endContact.add(contact);
+				beginContact.add(new Cont(contact.getFixtureA().getBody(), contact.getFixtureB().getBody()));
 				return;
 			} else if(b != null && b.getClass().equals(cl.getComponentType())) {
-				endContact.add(contact);
+				beginContact.add(new Cont(contact.getFixtureA().getBody(), contact.getFixtureB().getBody()));
 				return;
 			}
 		}

@@ -62,13 +62,15 @@ public class GameScreen extends AbstractGameScreen implements InputProcessor {
 	
 
 	
-	private GlyphLayout rotate;
+	private GlyphLayout speed;
 	
 	private BitmapFont font;
 	
 	private float orientation;
 	private float rotation;
 	private boolean debug;
+	
+	private float deltaMultiplier;
 	
 	public GameScreen(DirectedGame game) {
 		super(game);
@@ -80,6 +82,8 @@ public class GameScreen extends AbstractGameScreen implements InputProcessor {
 		world = new World(new Vector2(0, 0), true);
 		worldRenderer = new Box2DDebugRenderer();
 
+		deltaMultiplier = 1;
+		
 		RayHandler.setGammaCorrection(true);
 		lights = new RayHandler(world);
 		lights.setShadows(true);
@@ -93,7 +97,7 @@ public class GameScreen extends AbstractGameScreen implements InputProcessor {
 		
 		
 		font = Assets.instance.fonts.med;
-		rotate = new GlyphLayout();
+		speed = new GlyphLayout(font, "Speed: " + deltaMultiplier);
 		
 		
 		Gdx.input.setCatchBackKey(true);
@@ -168,14 +172,16 @@ public class GameScreen extends AbstractGameScreen implements InputProcessor {
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT | 
 				(Gdx.graphics.getBufferFormat().coverageSampling?GL20.GL_COVERAGE_BUFFER_BIT_NV:0));
 
+		
+		
 		if(Gdx.app.getType() != ApplicationType.Desktop) {
 			orientation = Math.max(Math.min(Gdx.input.getAccelerometerX(), 5), -5);
 		} else {
 			orientation = lerp(delta*2, orientation, MathUtils.clamp((Gdx.input.isKeyPressed(Keys.A) ? 5 : Gdx.input.isKeyPressed(Keys.D) ? -5 : -orientation), -5, 5));
 		}
 		if(Math.abs(orientation) > 0.5) { 
-			cam.rotate(orientation);
-			rotation += orientation;
+			cam.rotate(-orientation);
+			rotation -= orientation;
 			if(rotation >= 360) {
 				rotation -= 360;
 			} else if(rotation < 0) {
@@ -184,8 +190,6 @@ public class GameScreen extends AbstractGameScreen implements InputProcessor {
 		}
 		
 		player.setRotation(rotation);
-		
-		rotate.setText(font, "X: " + MathUtils.round(orientation*10)/10f);
 		
 		if(MathUtils.random(100) == MathUtils.random(100)) {
 			if(MathUtils.randomBoolean()) {
@@ -233,9 +237,10 @@ public class GameScreen extends AbstractGameScreen implements InputProcessor {
 		hud.update();
 		batch.setProjectionMatrix(hud.combined);
 		batch.begin();
-			/*font.setColor(Color.BLACK);
-			font.draw(batch, rotate, 1080/2-rotate.width/2, 1920/4+rotate.height/2);*/
-
+			font.setColor(Color.WHITE);
+			
+			font.draw(batch, speed, 0, 1920);
+			
 			//batch.draw(lights.getLightMapTexture(), 0, 0);
 		batch.end();
 		
