@@ -9,6 +9,9 @@ import com.ttocsneb.qubed.screen.transitions.ScreenTransition;
 
 public abstract class DirectedGame implements ApplicationListener {
 
+	// WARNING: I am too lazy to add internal comments to this class, enter at
+	// your own risk.
+
 	private boolean init;
 	private AbstractGameScreen currScreen;
 	private AbstractGameScreen nextScreen;
@@ -17,32 +20,39 @@ public abstract class DirectedGame implements ApplicationListener {
 	private SpriteBatch batch;
 	private float t;
 	private ScreenTransition screenTransition;
-	
+
 	public void setScreen(AbstractGameScreen screen) {
 		setScreen(screen, null);
 	}
-	
-	public void setScreen(AbstractGameScreen screen, ScreenTransition screenTransition) {
+
+	/**
+	 * Set the active screen, and transition to it.
+	 * 
+	 * @param screen
+	 * @param screenTransition
+	 */
+	public void setScreen(AbstractGameScreen screen,
+			ScreenTransition screenTransition) {
 		int w = Gdx.graphics.getWidth();
 		int h = Gdx.graphics.getHeight();
-		if(!init) {
+		if (!init) {
 			currFbo = new FrameBuffer(Format.RGB888, w, h, false);
 			nextFbo = new FrameBuffer(Format.RGB888, w, h, false);
 			batch = new SpriteBatch();
 			init = true;
 		}
-		//Start a new Transition
+		// Start a new Transition
 		nextScreen = screen;
 		nextScreen.show();
 		nextScreen.resize(w, h);
 		nextScreen.render(0);
-		if(currScreen != null) currScreen.pause();
+		if (currScreen != null) currScreen.pause();
 		nextScreen.pause();
 		Gdx.input.setInputProcessor(null);
 		this.screenTransition = screenTransition;
 		t = 0;
 	}
-	
+
 	@Override
 	public void create() {
 
@@ -55,57 +65,58 @@ public abstract class DirectedGame implements ApplicationListener {
 
 	@Override
 	public void render() {
-		//get delta time and ensure an upper limit of one 60th second.
-		float delta = Math.min(Gdx.graphics.getDeltaTime(), 1/60f);
-		if(nextScreen == null) {
-			//no ongoing transition
-			if(currScreen != null) currScreen.render(delta);
+		// get delta time and ensure an upper limit of one 60th second.
+		float delta = Math.min(Gdx.graphics.getDeltaTime(), 1 / 60f);
+		if (nextScreen == null) {
+			// no ongoing transition
+			if (currScreen != null) currScreen.render(delta);
 		} else {
-			//ongoing transition.
+			// ongoing transition.
 			float duration = 0;
-			if(screenTransition != null)
+			if (screenTransition != null)
 				duration = screenTransition.getDuration();
-			//update progress of ongoing transition.
-			t = Math.min(t + delta,  duration);
-			if(screenTransition == null || t >= duration) {
-				if(currScreen != null) currScreen.hide();
+			// update progress of ongoing transition.
+			t = Math.min(t + delta, duration);
+			if (screenTransition == null || t >= duration) {
+				if (currScreen != null) currScreen.hide();
 				nextScreen.resume();
-				//enable input for nextScreen.
+				// enable input for nextScreen.
 				Gdx.input.setInputProcessor(nextScreen.getInputProcessor());
-				//switch screens.
+				// switch screens.
 				currScreen = nextScreen;
 				nextScreen = null;
 				screenTransition = null;
 			} else {
-				//render screens to FBOs.
+				// render screens to FBOs.
 				currFbo.begin();
-				if(currScreen != null) currScreen.render(delta);
+				if (currScreen != null) currScreen.render(delta);
 				currFbo.end();
 				nextFbo.begin();
 				nextScreen.render(delta);
 				nextFbo.end();
-				//render transition effect to screen.
-				float alpha = t/duration;
-				screenTransition.render(batch, currFbo.getColorBufferTexture(), nextFbo.getColorBufferTexture(), alpha);
+				// render transition effect to screen.
+				float alpha = t / duration;
+				screenTransition.render(batch, currFbo.getColorBufferTexture(),
+						nextFbo.getColorBufferTexture(), alpha);
 			}
 		}
 	}
 
 	@Override
 	public void pause() {
-		if(currScreen != null) currScreen.pause();
+		if (currScreen != null) currScreen.pause();
 	}
 
 	@Override
 	public void resume() {
-		if(currScreen != null) currScreen.resume();
+		if (currScreen != null) currScreen.resume();
 	}
 
 	@Override
 	public void dispose() {
-		if(currScreen != null) currScreen.hide();
-		if(nextScreen != null) nextScreen.hide();
-		if(init) {
+		if (currScreen != null) currScreen.hide();
+		if (nextScreen != null) nextScreen.hide();
+		if (init) {
 			currFbo.dispose();
 			currScreen = null;
 			nextFbo.dispose();

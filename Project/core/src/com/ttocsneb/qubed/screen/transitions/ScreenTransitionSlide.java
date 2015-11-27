@@ -20,6 +20,14 @@ public class ScreenTransitionSlide implements ScreenTransition {
 	private boolean slideOut;
 	private Interpolation easing;
 	
+	/**
+	 *  Initiate the TransitionSlide Transition.
+	 * @param duration
+	 * @param direction Left - 1; Right - 2; Up - 3; Down - 4
+	 * @param slideOut
+	 * @param easing
+	 * @return
+	 */
 	public static ScreenTransitionSlide init(float duration, int direction, boolean slideOut, Interpolation easing) {
 		instance.duration = duration;
 		instance.direction = direction;

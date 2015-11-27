@@ -18,6 +18,11 @@ public class ScreenTransitionPixelize implements ScreenTransition {
 	
 	private ShaderProgram pix;
 	
+	/**
+	 * Initiate the TransitionPixelize Transition.
+	 * @param duration
+	 * @return
+	 */
 	public static ScreenTransitionPixelize init(float duration) {
 		instance.duration = duration;
 		

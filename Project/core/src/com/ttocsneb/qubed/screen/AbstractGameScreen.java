@@ -34,6 +34,10 @@ public abstract class AbstractGameScreen implements Screen {
 		Assets.instance.dispose();
 	}
 	
+	/**
+	 * Get the Input processor.
+	 * @return Input Processor
+	 */
 	public abstract InputProcessor getInputProcessor();
 	
 }

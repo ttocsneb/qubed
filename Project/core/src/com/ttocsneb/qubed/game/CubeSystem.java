@@ -18,21 +18,29 @@ import com.ttocsneb.qubed.game.contact.ContactListener;
 import com.ttocsneb.qubed.screen.GameScreen;
 import com.ttocsneb.qubed.util.Assets;
 
-public class CubeSystem extends EntitySystem implements ContactListener{
-    private ImmutableArray<Entity> entities;
+/**
+ * All logic for Cubes.
+ * 
+ * @author TtocsNeb
+ *
+ */
+public class CubeSystem extends EntitySystem implements ContactListener {
 
-	private ComponentMapper<CubeComponent> cc = ComponentMapper.getFor(CubeComponent.class);
-	
+	private ImmutableArray<Entity> entities;
+
+	private ComponentMapper<CubeComponent> cc = ComponentMapper
+			.getFor(CubeComponent.class);
+
 	private GameScreen game;
 	private Engine engine;
-	
+
 	private ParticleEffectPool squareEffect;
-	
-	
+
 	public CubeSystem(GameScreen gs) {
 		game = gs;
-		
-		squareEffect = new ParticleEffectPool(Assets.instance.particles.squareExp, 1, 5);
+
+		squareEffect = new ParticleEffectPool(
+				Assets.instance.particles.squareExp, 1, 5);
 	}
 
 	@Override
@@ -40,140 +48,131 @@ public class CubeSystem extends EntitySystem implements ContactListener{
 	public void addedToEngine(Engine engine) {
 		entities = engine.getEntitiesFor(Family.all(CubeComponent.class).get());
 		this.engine = engine;
-		
+
 	}
-	
+
 	@Override
 	public void update(float delta) {
-		//float size, distance;
-		
-		for(int i=0; i<entities.size(); i++) {
-			Entity entity = entities.get(i);
+
+		// Go through all cubes.
+		for (Entity entity : entities) {
 			CubeComponent cube = cc.get(entity);
-			
-			//distance = (float)Math.sqrt(Math.pow(cube.x, 2) + Math.pow(cube.y, 2));
-			
-			if(cube.die) {
-				//cube.x = lerp(delta*4, cube.x, 0);
-				//cube.y = lerp(delta*4, cube.y, 0);
-				cube.scale -= delta*4;
-				updateShape(cube, cube.scale);
-				if(cube.scale <= 0) {
+
+			// Kill the cube if it is unworthy of living.
+			if (cube.die) {
+				cube.scale -= delta * 4;
+				updateShape(cube);
+
+				// Dispose of the dead body.
+				if (cube.scale <= 0) {
 					game.world.destroyBody(cube.body);
 					engine.removeEntity(entity);
 					continue;
 				}
 			} else {
+				// I'm still not sure why we need to update the positioning
+				// system.
 				cube.x = cube.body.getPosition().x;
 				cube.y = cube.body.getPosition().y;
 			}
-			
-			//size = cube.scale * (1-distance/3f);
-			
-			
-			/*if(cube.rotation) {
-				cube.progress += delta*4;
-			
-				if(cube.progress >= 1) {
-					cube.progress = 0;
-				}
-			} else {
-				cube.progress -= delta*4;
-			
-				if(cube.progress <= 0) {
-					cube.progress = 1;
-				}
-			}*/
-			
-			cube.rotation = (cube.body.getAngle() * MathUtils.radiansToDegrees); 
-			
-			//interpolation = Interpolation.sine.apply(cube.progress);
 
+			// set the rotation, why can't we use the body directly?
+			cube.rotation = (cube.body.getAngle() * MathUtils.radiansToDegrees);
+
+			// Set the color to draw the cube.
 			game.shape.setColor(cube.color);
-			
-			//As the shape renderer does not support filled polygons, Draw two triangles to form the custom square.
-			
-			/*a.set(cube.x-cube.scale/2f, cube.y-cube.scale/2f);
-			b.set(cube.x+cube.scale/2f, cube.y-cube.scale/2f);
-			c.set(cube.x+cube.scale/2f, cube.y+cube.scale/2f);
-			d.set(cube.x-cube.scale/2f, cube.y+cube.scale/2f);*/
-			
-			game.shape.rect(cube.x-cube.scale/2f, cube.y-cube.scale/2f, cube.scale/2f, cube.scale/2f, cube.scale,
-					cube.scale, 1, 1, cube.rotation);
-			
-			/*game.shape.triangle(
-					a.x, a.y,
-					b.x, b.y,
-					c.x, c.y);
-			
-			game.shape.triangle(
-					c.x, c.y,
-					d.x, d.y,
-					a.x, a.y);*/
 
-			if(Math.pow(cube.x, 2) + Math.pow(cube.y, 2) >= 9f) {
+			// Draw the Cube.
+			game.shape.rect(cube.x - cube.scale / 2f, cube.y - cube.scale / 2f,
+					cube.scale / 2f, cube.scale / 2f, cube.scale, cube.scale,
+					1, 1, cube.rotation);
+
+			// Kill the cube if it broke the barrier rule.
+			if (Math.pow(cube.x, 2) + Math.pow(cube.y, 2) >= 9f) {
 				cube.die = true;
 			}
-			
+
 		}
 	}
-	
-	private void updateShape(CubeComponent cc, float size) {
-		if(cc.fixture != null && cc.fixture.getBody() != null) {
+
+	/**
+	 * Update a cube's shape.
+	 * 
+	 * @param cc
+	 */
+	private void updateShape(CubeComponent cc) {
+		// Remove any existing shapes.
+		if (cc.fixture != null && cc.fixture.getBody() != null) {
 			cc.body.destroyFixture(cc.fixture);
 		}
-		
-		if(size <= 0) {
+
+		// don't even try to make a non-existing shape. It's almost as bad as
+		// dividing by zero.
+		if (cc.scale <= 0) {
 			return;
 		}
-		
+
+		// Make a fixture
 		FixtureDef fdef = new FixtureDef();
-		
+
 		fdef.density = 0.1f;
 		fdef.friction = 0.2f;
 		fdef.restitution = 0.5f;
-		
+
+		// Create the shape.
 		PolygonShape shape = new PolygonShape();
-		shape.set(new float[] {-cc.scale/2f, -cc.scale/2f,
-				-cc.scale/2f, cc.scale/2f,
-				cc.scale/2f, -cc.scale/2f,
-				cc.scale/2f, cc.scale/2f
+		shape.set(new float[] {
+				-cc.scale / 2f, -cc.scale / 2f, -cc.scale / 2f, cc.scale / 2f,
+				cc.scale / 2f, -cc.scale / 2f, cc.scale / 2f, cc.scale / 2f
 		});
 		fdef.shape = shape;
-		
+
+		// Create the fixture.
 		cc.fixture = cc.body.createFixture(fdef);
-		
+
+		// dispose of the bad shape.
 		shape.dispose();
 	}
 
 	/**
 	 * Add a Cube to the System.
 	 * 
-	 * @Warning Not using this function without initializing a Body will result in the game crashing.
+	 * <pre>
+	 * <b>
+	 * Warning: Not using this function without initializing a Body will result
+	 *          in the game crashing.
+	 * </b>
+	 * </pre>
 	 * 
 	 * @param cc
 	 */
 	public void addCube(CubeComponent cc) {
+		// Create a new Cube entity.
 		Entity e = new Entity();
 		e.add(cc);
 		engine.addEntity(e);
-		
+
+		// make a body.
 		BodyDef bdef = new BodyDef();
-		
+
 		bdef.type = BodyType.DynamicBody;
 		bdef.position.set(cc.x, cc.y);
-		
+
+		// Create the body.
 		cc.body = game.world.createBody(bdef);
 		cc.body.setUserData(cc);
-		
-		cc.body.setLinearVelocity(cc.velocity * MathUtils.cosDeg(cc.direction), cc.velocity * MathUtils.sinDeg(cc.direction));
-		
-		updateShape(cc, cc.scale);
+
+		// Set it's velocity.
+		cc.body.setLinearVelocity(cc.velocity * MathUtils.cosDeg(cc.direction),
+				cc.velocity * MathUtils.sinDeg(cc.direction));
+
+		// give it a shape.
+		updateShape(cc);
 	}
-	
+
 	@SuppressWarnings("unused")
 	private float lerp(float t, float a, float b) {
-		return (a + t*(b-a));
+		return (a + t * (b - a));
 	}
 
 	@Override
@@ -184,15 +183,17 @@ public class CubeSystem extends EntitySystem implements ContactListener{
 	@Override
 	public void beginContact(Component object, Object object2) {
 		CubeComponent cc = (CubeComponent) object;
-		
-		//Die if the Cube comes into contact with a bullet.
-		if(object2 instanceof BulletComponent) {
+
+		// Kill the cube if it even grazes a bullet.
+		if (object2 instanceof BulletComponent) {
 			((BulletComponent) object2).die = true;
 			cc.die = true;
-			
+
 			PooledEffect effect = squareEffect.obtain();
 			effect.setPosition(cc.x, cc.y);
-			effect.getEmitters().get(0).getTint().setColors(new float[]{cc.color.r, cc.color.g, cc.color.b});
+			effect.getEmitters().get(0).getTint().setColors(new float[] {
+					cc.color.r, cc.color.g, cc.color.b
+			});
 			effect.getEmitters().get(0).getScale().setHigh(cc.scale);
 			game.particle.addEffect(effect);
 		}
@@ -201,8 +202,6 @@ public class CubeSystem extends EntitySystem implements ContactListener{
 	@Override
 	public void endContact(Component object, Object object2) {
 
-		
 	}
 
-	
 }

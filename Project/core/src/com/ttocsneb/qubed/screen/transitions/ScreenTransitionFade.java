@@ -11,6 +11,11 @@ public class ScreenTransitionFade implements ScreenTransition {
 	
 	private float duration;
 	
+	/**
+	 * Initiate the TransitionFade Transition.
+	 * @param duration
+	 * @return
+	 */
 	public static ScreenTransitionFade init(float duration) {
 		instance.duration = duration;
 		return instance;
