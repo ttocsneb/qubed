@@ -63,10 +63,11 @@ public class CircleSystem extends EntitySystem implements ContactListener {
 		//Remove any existing shapes.
 		if (cc.fixture != null && cc.fixture.getBody() != null) {
 			cc.body.destroyFixture(cc.fixture);
+			cc.fixture = null;
 		}
 
 		//Don't try to create a shape, that shouldn't exist.
-		if (size <= 0) {
+		if (size < 0.001f) {
 			return;
 		}
 

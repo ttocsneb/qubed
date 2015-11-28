@@ -101,14 +101,16 @@ public class CubeSystem extends EntitySystem implements ContactListener {
 	 * @param cc
 	 */
 	private void updateShape(CubeComponent cc) {
+
 		// Remove any existing shapes.
 		if (cc.fixture != null && cc.fixture.getBody() != null) {
 			cc.body.destroyFixture(cc.fixture);
+			cc.fixture = null;
 		}
 
-		// don't even try to make a non-existing shape. It's almost as bad as
-		// dividing by zero.
-		if (cc.scale <= 0) {
+		// don't even think about making a non-existing shape. It's almost as
+		// bad as dividing by zero.
+		if (cc.scale < 0.001f) {
 			return;
 		}
 

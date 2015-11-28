@@ -94,9 +94,10 @@ public class PlayerSystem extends EntitySystem {
 		// Remove the fixture if it exists.
 		if (fixture != null && fixture.getBody() != null) {
 			body.destroyFixture(fixture);
+			fixture = null;
 		}
 
-		if (size <= 0) return;
+		if (size < 0.001f) return;
 
 		FixtureDef fdef = new FixtureDef();
 
