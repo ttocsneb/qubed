@@ -199,9 +199,45 @@ public class Assets implements Disposable, AssetErrorListener {
 
 		assetManager.load("music/Blip Stream.mp3", Music.class);
 
-		// start loading assets and wait until finished.
+	}
 
+	/**
+	 * Check if loaded.
+	 * 
+	 * @return
+	 */
+	public boolean isLoaded() {
+		return loaded;
+	}
+
+	/**
+	 * Waits until all assets are loaded.
+	 */
+	public void finishLoading() {
 		assetManager.finishLoading();
+		while (getProgress() != 1);
+	}
+
+	/**
+	 * Get the progress in percent of completion.
+	 * 
+	 * <pre>
+	 * <b>Note: no assets are loaded until returns 1.0</b>
+	 * </pre>
+	 * 
+	 * @return the progress in percent of completion.
+	 */
+	public float getProgress() {
+		//return 100% if the assets are loaded
+		if (loaded) return 1;
+
+		
+		assetManager.update();
+		
+		//return the progress if not yet loaded.
+		if (assetManager.getProgress() < 1) return assetManager.getProgress();
+
+		loaded = true;
 
 		Gdx.app.debug(TAG,
 				"# of assets loadied: " + assetManager.getAssetNames().size);
@@ -230,15 +266,7 @@ public class Assets implements Disposable, AssetErrorListener {
 
 		fonts = new AssetFonts();
 		loaded = true;
-	}
-
-	/**
-	 * Check if loaded.
-	 * 
-	 * @return
-	 */
-	public boolean isLoaded() {
-		return loaded;
+		return 1;
 	}
 
 	@Override

@@ -33,11 +33,12 @@ public abstract class DirectedGame implements ApplicationListener {
 	 */
 	public void setScreen(AbstractGameScreen screen,
 			ScreenTransition screenTransition) {
+		t = 0;
 		int w = Gdx.graphics.getWidth();
 		int h = Gdx.graphics.getHeight();
 		if (!init) {
-			currFbo = new FrameBuffer(Format.RGB888, w, h, false);
-			nextFbo = new FrameBuffer(Format.RGB888, w, h, false);
+			currFbo = new FrameBuffer(Format.RGB565, w, h, false);
+			nextFbo = new FrameBuffer(Format.RGB565, w, h, false);
 			batch = new SpriteBatch();
 			init = true;
 		}
@@ -50,7 +51,6 @@ public abstract class DirectedGame implements ApplicationListener {
 		nextScreen.pause();
 		Gdx.input.setInputProcessor(null);
 		this.screenTransition = screenTransition;
-		t = 0;
 	}
 
 	@Override

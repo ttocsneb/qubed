@@ -25,6 +25,18 @@ public class Global {
 	public static final ShapeRenderer shape = new ShapeRenderer();
 
 	/**
+	 * Performs a linear interpolation
+	 * 
+	 * @param alpha
+	 * @param start
+	 * @param end
+	 * @return
+	 */
+	public static float lerp(float alpha, float start, float end) {
+		return (start + alpha * (end - start));
+	}
+
+	/**
 	 * Contains the configurations for the application.
 	 * 
 	 * @author TtocsNeb
@@ -51,5 +63,10 @@ public class Global {
 	}
 
 	public static boolean start = false;
+
+	public static void dispose() {
+		batch.dispose();
+		shape.dispose();
+	}
 
 }

@@ -175,17 +175,7 @@ public class GameScreen extends AbstractGameScreen implements InputProcessor {
 		}
 	}
 
-	/**
-	 * Performs a linear interpolation
-	 * 
-	 * @param alpha
-	 * @param start
-	 * @param end
-	 * @return
-	 */
-	private float lerp(float alpha, float start, float end) {
-		return (start + alpha * (end - start));
-	}
+	
 
 	@Override
 	public void render(float delta) {
@@ -201,7 +191,7 @@ public class GameScreen extends AbstractGameScreen implements InputProcessor {
 					-5);
 		} else {
 			// Rotate the screen using the accelerometer.
-			orientation = lerp(delta * 2, orientation, MathUtils.clamp(
+			orientation = Global.lerp(delta * 2, orientation, MathUtils.clamp(
 					(Gdx.input.isKeyPressed(Keys.A) ? 5 : Gdx.input
 							.isKeyPressed(Keys.D) ? -5 : -orientation), -5, 5));
 		}
