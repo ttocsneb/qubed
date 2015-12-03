@@ -2,6 +2,8 @@ package com.ttocsneb.qubed.util;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Preferences;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 
 /**
  * Global variables accessible by all classes.
@@ -18,6 +20,9 @@ public class Global {
 	public static final float VIEWPROT_GUI_HEIGHT = 1920;
 
 	public static final String TEXTURE_ATLAS = "textures/textures.atlas";
+
+	public static final SpriteBatch batch = new SpriteBatch();
+	public static final ShapeRenderer shape = new ShapeRenderer();
 
 	/**
 	 * Contains the configurations for the application.

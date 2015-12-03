@@ -152,8 +152,8 @@ public class GameScreen extends AbstractGameScreen implements InputProcessor {
 				Global.VIEWPORT_GUI_WIDTH / 2, hud.position.z);
 
 		// Create the renderers.
-		batch = new SpriteBatch();
-		shape = new ShapeRenderer();
+		batch = Global.batch;
+		shape = Global.shape;
 
 	}
 
@@ -324,8 +324,6 @@ public class GameScreen extends AbstractGameScreen implements InputProcessor {
 
 	@Override
 	public void hide() {
-		batch.dispose();
-		shape.dispose();
 		world.dispose();
 		worldRenderer.dispose();
 		particle.dispose();

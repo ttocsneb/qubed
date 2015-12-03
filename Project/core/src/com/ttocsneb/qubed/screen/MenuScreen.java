@@ -83,8 +83,8 @@ public class MenuScreen extends AbstractGameScreen implements GestureListener {
 		cam.setToOrtho(false, 1080, 1920);
 
 		// Init the renderers.
-		batch = new SpriteBatch();
-		shape = new ShapeRenderer();
+		batch = Global.batch;
+		shape = Global.shape;
 
 		// Initiate arrow animation variables
 		animProgress = 0;
@@ -197,8 +197,7 @@ public class MenuScreen extends AbstractGameScreen implements GestureListener {
 
 	@Override
 	public void hide() {
-		batch.dispose();
-		shape.dispose();
+
 	}
 
 	@Override
@@ -254,7 +253,7 @@ public class MenuScreen extends AbstractGameScreen implements GestureListener {
 	@Override
 	public boolean panStop(float x, float y, int pointer, int button) {
 
-		//Reset the pan.. I think.
+		// Reset the pan.. I think.
 		if (this.x >= 1080) {
 			this.x = 1080;
 		} else {
