@@ -11,6 +11,8 @@ import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
@@ -20,6 +22,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Box2D;
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
 import com.badlogic.gdx.physics.box2d.World;
+import com.badlogic.gdx.utils.Align;
 import com.ttocsneb.qubed.game.BulletSystem;
 import com.ttocsneb.qubed.game.CircleComponent;
 import com.ttocsneb.qubed.game.CircleSystem;
@@ -30,6 +33,7 @@ import com.ttocsneb.qubed.game.PlayerSystem;
 import com.ttocsneb.qubed.game.contact.ContactManager;
 import com.ttocsneb.qubed.screen.transitions.ScreenTransition;
 import com.ttocsneb.qubed.screen.transitions.ScreenTransitionSlide;
+import com.ttocsneb.qubed.util.Assets;
 import com.ttocsneb.qubed.util.Global;
 
 /**
@@ -74,6 +78,10 @@ public class GameScreen extends AbstractGameScreen implements InputProcessor {
 	// Debug variables.
 	private boolean debug;
 
+	private BitmapFont font;
+	private GlyphLayout gameOver;
+	private float gameOverProg;
+
 	/**
 	 * Create a new Game Screen
 	 * 
@@ -100,6 +108,10 @@ public class GameScreen extends AbstractGameScreen implements InputProcessor {
 		initEngine();
 
 		initCamera();
+
+		font = Assets.instance.fonts.huge;
+		gameOver = new GlyphLayout(font, "GAME OVER", Color.RED, 1080,
+				Align.center, true);
 
 		// Don't allow the back button(on Android) to close the game.
 		Gdx.input.setCatchBackKey(true);
@@ -146,10 +158,7 @@ public class GameScreen extends AbstractGameScreen implements InputProcessor {
 
 		// Create the Ui Camera
 		hud = new OrthographicCamera();
-		hud.setToOrtho(false, Global.VIEWPORT_GUI_HEIGHT,
-				Global.VIEWPORT_GUI_WIDTH);
-		hud.position.set(Global.VIEWPROT_GUI_HEIGHT / 2,
-				Global.VIEWPORT_GUI_WIDTH / 2, hud.position.z);
+		hud.setToOrtho(false, 1080, 1920);
 
 		// Create the renderers.
 		batch = Global.batch;
@@ -175,8 +184,6 @@ public class GameScreen extends AbstractGameScreen implements InputProcessor {
 		}
 	}
 
-	
-
 	@Override
 	public void render(float delta) {
 		// Clear the screen.
@@ -185,6 +192,7 @@ public class GameScreen extends AbstractGameScreen implements InputProcessor {
 				| (Gdx.graphics.getBufferFormat().coverageSampling ? GL20.GL_COVERAGE_BUFFER_BIT_NV
 						: 0));
 
+		
 		if (Gdx.app.getType() != ApplicationType.Desktop) {
 			// Rotate the screen using buttons if on desktop.
 			orientation = Math.max(Math.min(Gdx.input.getAccelerometerX(), 5),
@@ -196,7 +204,7 @@ public class GameScreen extends AbstractGameScreen implements InputProcessor {
 							.isKeyPressed(Keys.D) ? -5 : -orientation), -5, 5));
 		}
 
-		if (Math.abs(orientation) > 0.5) {
+		if (!player.died() && Math.abs(orientation) > 0.5) {
 			// Rotate the screen.
 			cam.rotate(-orientation);
 			rotation -= orientation;
@@ -265,8 +273,28 @@ public class GameScreen extends AbstractGameScreen implements InputProcessor {
 		batch.begin();
 		// //////////////////////////HUD BATCH/////////////////////////////
 
+		// Check if the player has died.
+		if (player.died()) {
+			// If the player has died, draw the game Over display.
+			gameOverProg = Math.min(gameOverProg + delta, 1);
+			float prog = Interpolation.sineOut.apply(gameOverProg);
+
+			font.draw(batch, gameOver, 0, 1920-(960 + gameOver.height*0.25f)*prog + gameOver.height);
+		}
+
 		// //////////////////////////HUD BATCH/////////////////////////////
 		batch.end();
+		
+		if(player.died()) {
+
+			Gdx.gl.glEnable(GL20.GL_BLEND);
+			Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
+			shape.setProjectionMatrix(hud.combined);
+			shape.begin(ShapeType.Filled);
+			shape.setColor(1, 0, 0, gameOverProg*0.5f);
+			shape.rect(0, 0, 1080, 1920);
+			shape.end();
+		}
 
 	}
 
@@ -278,8 +306,12 @@ public class GameScreen extends AbstractGameScreen implements InputProcessor {
 		int rot = MathUtils.random(360);
 		cubeComp.x = 2.9f * MathUtils.cosDeg(rot);
 		cubeComp.y = 2.9f * MathUtils.sinDeg(rot);
-		cubeComp.direction = rot - 180 < 0 ? rot + 180 : rot - 180;
-		cubeComp.velocity = MathUtils.random(0.5f, 2);
+		cubeComp.direction = MathUtils.randomBoolean(.6f) ? (rot - 180 < 0 ? rot + 180
+				: rot - 180)
+				: (MathUtils.random(
+						(rot - 180 < 0 ? rot + 180 : rot - 180) - 45,
+						(rot - 180 < 0 ? rot + 180 : rot - 180) + 45));
+		cubeComp.velocity = MathUtils.random(0.5f, 1);
 		cubeComp.scale = MathUtils.random(0.5f, 0.9f);
 		cubeComp.color = selectColor();
 
@@ -295,7 +327,11 @@ public class GameScreen extends AbstractGameScreen implements InputProcessor {
 		int rot = MathUtils.random(360);
 		circComp.x = 2.9f * MathUtils.cosDeg(rot);
 		circComp.y = 2.9f * MathUtils.sinDeg(rot);
-		circComp.direction = rot - 180 < 0 ? rot + 180 : rot - 180;
+		circComp.direction = MathUtils.randomBoolean(.6f) ? (rot - 180 < 0 ? rot + 180
+				: rot - 180)
+				: (MathUtils.random(
+						(rot - 180 < 0 ? rot + 180 : rot - 180) - 45,
+						(rot - 180 < 0 ? rot + 180 : rot - 180) + 45));
 		circComp.velocity = MathUtils.random(0.5f, 1);
 		circComp.scale = MathUtils.random(0.25f, 0.75f);
 		circComp.color = selectColor();

@@ -155,6 +155,13 @@ public class PlayerSystem extends EntitySystem implements ContactListener {
 		health = 1;
 	}
 
+	/**
+	 * @return <b>true</b> if the player has died.
+	 */
+	public boolean died() {
+		return size <= 0;
+	}
+
 	private Vector2 point(Vector2 a, Vector2 b, float percent) {
 
 		return new Vector2(a.x + ((b.x - a.x) * percent), a.y
@@ -189,10 +196,6 @@ public class PlayerSystem extends EntitySystem implements ContactListener {
 		// Mechanics
 		//
 		// ///////////////////////////////////////////////////////////
-
-		if (size < 0.1f) {
-			health = 1;
-		}
 
 		// Shoot
 		if (size > 0.1 && coolDown <= 0 && Gdx.input.isTouched() && !touched) {
@@ -245,82 +248,95 @@ public class PlayerSystem extends EntitySystem implements ContactListener {
 		//
 		// ///////////////////////////////////////////////////////////
 
-		rotation = nlerp(delta * 7, rotation, direction);
+		if (size > 0) {
 
-		game.shape.setColor(Color.LIGHT_GRAY.mul(Color.CYAN));
+			rotation = nlerp(delta * 7, rotation, direction);
 
-		if (coolDown <= 0) {
+			game.shape.setColor(Color.LIGHT_GRAY.mul(Color.CYAN));
 
-			// Draw the Triangle
-			a.set(size / 2f * MathUtils.sinDeg(rotation),
-					size / 2f * MathUtils.cosDeg(rotation));
-			b.set(a.x * MathUtils.cosDeg(240) - (a.y * MathUtils.sinDeg(240)),
-					a.x * MathUtils.sinDeg(240) + (a.y * MathUtils.cosDeg(240)));
-			c.set(a.x * MathUtils.cosDeg(120) - (a.y * MathUtils.sinDeg(120)),
-					a.x * MathUtils.sinDeg(120) + (a.y * MathUtils.cosDeg(120)));
+			if (coolDown <= 0) {
 
-			game.shape.triangle(a.x, a.y, c.x, c.y, b.x, b.y);
-		} else {
+				// Draw the Triangle
+				a.set(size / 2f * MathUtils.sinDeg(rotation), size / 2f
+						* MathUtils.cosDeg(rotation));
+				b.set(a.x * MathUtils.cosDeg(240)
+						- (a.y * MathUtils.sinDeg(240)),
+						a.x * MathUtils.sinDeg(240)
+								+ (a.y * MathUtils.cosDeg(240)));
+				c.set(a.x * MathUtils.cosDeg(120)
+						- (a.y * MathUtils.sinDeg(120)),
+						a.x * MathUtils.sinDeg(120)
+								+ (a.y * MathUtils.cosDeg(120)));
 
-			// calculate the modifications to the triangle
-			float progress = 0;
-
-			// wait until the delay has passed before making modifications.
-			if (delay > 0) {
-				delay = Math.max(delay - delta, 0);
+				game.shape.triangle(a.x, a.y, c.x, c.y, b.x, b.y);
 			} else {
-				// Get the percentage of the transition.
-				coolDown = Math.max(coolDown - delta, 0);
 
-				// If the the animation has finished, draw the triangle
-				if (coolDown == 0) {
-					size -= BULLETSIZE;
-					health -= BULLETSIZE;
+				// calculate the modifications to the triangle
+				float progress = 0;
 
-					// Calculate the points of the triangle.
-					a.set(size / 2f * MathUtils.sinDeg(rotation), size / 2f
-							* MathUtils.cosDeg(rotation));
-					b.set(a.x * MathUtils.cosDeg(240)
-							- (a.y * MathUtils.sinDeg(240)),
-							a.x * MathUtils.sinDeg(240)
-									+ (a.y * MathUtils.cosDeg(240)));
-					c.set(a.x * MathUtils.cosDeg(120)
-							- (a.y * MathUtils.sinDeg(120)),
-							a.x * MathUtils.sinDeg(120)
-									+ (a.y * MathUtils.cosDeg(120)));
+				// wait until the delay has passed before making modifications.
+				if (delay > 0) {
+					delay = Math.max(delay - delta, 0);
+				} else {
+					// Get the percentage of the transition.
+					coolDown = Math.max(coolDown - delta, 0);
 
-					// Draw the triangle.
-					game.shape.triangle(a.x, a.y, c.x, c.y, b.x, b.y);
+					// If the the animation has finished, draw the triangle
+					if (coolDown == 0) {
+						size -= BULLETSIZE;
+						health -= BULLETSIZE;
 
-					// Stop the method
-					return;
+						// Calculate the points of the triangle.
+						a.set(size / 2f * MathUtils.sinDeg(rotation), size / 2f
+								* MathUtils.cosDeg(rotation));
+						b.set(a.x * MathUtils.cosDeg(240)
+								- (a.y * MathUtils.sinDeg(240)),
+								a.x * MathUtils.sinDeg(240)
+										+ (a.y * MathUtils.cosDeg(240)));
+						c.set(a.x * MathUtils.cosDeg(120)
+								- (a.y * MathUtils.sinDeg(120)),
+								a.x * MathUtils.sinDeg(120)
+										+ (a.y * MathUtils.cosDeg(120)));
+
+						// Draw the triangle.
+						game.shape.triangle(a.x, a.y, c.x, c.y, b.x, b.y);
+
+						// Stop the method
+						return;
+					}
+
+					// Calculate the progress of the transition, and interpolate
+					// it
+					// to make it smooth.
+					progress = 1 - coolDown / COOLDOWN;
+					progress = Interpolation.pow2Out.apply(progress);
+					progress *= BULLETSIZE;
+
 				}
 
-				// Calculate the progress of the transition, and interpolate it
-				// to make it smooth.
-				progress = 1 - coolDown / COOLDOWN;
-				progress = Interpolation.pow2Out.apply(progress);
-				progress *= BULLETSIZE;
+				// Calculate the points of the triangle.
+				a.set((size / 2f - progress / 2f) * MathUtils.sinDeg(rotation),
+						(size / 2f - progress / 2f)
+								* MathUtils.cosDeg(rotation));
+				b.set(a.x * MathUtils.cosDeg(240)
+						- (a.y * MathUtils.sinDeg(240)),
+						a.x * MathUtils.sinDeg(240)
+								+ (a.y * MathUtils.cosDeg(240)));
+				c.set(a.x * MathUtils.cosDeg(120)
+						- (a.y * MathUtils.sinDeg(120)),
+						a.x * MathUtils.sinDeg(120)
+								+ (a.y * MathUtils.cosDeg(120)));
+				e.set(point(a, c, (BULLETSIZE - progress) / size));
+				d.set(point(a, b, (BULLETSIZE - progress) / size));
 
+				// Draw the Triangle without the top.
+				game.shape.triangle(e.x, e.y, d.x, d.y, b.x, b.y);
+
+				game.shape.triangle(e.x, e.y, c.x, c.y, b.x, b.y);
+
+				// Resize the box2D triangle
+				updateShape(size - progress);
 			}
-
-			// Calculate the points of the triangle.
-			a.set((size / 2f - progress / 2f) * MathUtils.sinDeg(rotation),
-					(size / 2f - progress / 2f) * MathUtils.cosDeg(rotation));
-			b.set(a.x * MathUtils.cosDeg(240) - (a.y * MathUtils.sinDeg(240)),
-					a.x * MathUtils.sinDeg(240) + (a.y * MathUtils.cosDeg(240)));
-			c.set(a.x * MathUtils.cosDeg(120) - (a.y * MathUtils.sinDeg(120)),
-					a.x * MathUtils.sinDeg(120) + (a.y * MathUtils.cosDeg(120)));
-			e.set(point(a, c, (BULLETSIZE - progress) / size));
-			d.set(point(a, b, (BULLETSIZE - progress) / size));
-
-			// Draw the Triangle without the top.
-			game.shape.triangle(e.x, e.y, d.x, d.y, b.x, b.y);
-
-			game.shape.triangle(e.x, e.y, c.x, c.y, b.x, b.y);
-
-			// Resize the box2D triangle
-			updateShape(size - progress);
 		}
 
 	}
@@ -389,18 +405,17 @@ public class PlayerSystem extends EntitySystem implements ContactListener {
 
 	@Override
 	public void beginContact(Component object, Object object2) {
-		
-		
-		if(object2 instanceof CircleComponent) {
+
+		if (object2 instanceof CircleComponent) {
 			CircleComponent circ = (CircleComponent) object2;
 			circ.die = true;
-			
+
 			PooledEffect effect = triangleEffect.obtain();
 			effect.setPosition(0, 0);
-			effect.getEmitters().get(0).getScale().setHigh(size/2f);
+			effect.getEmitters().get(0).getScale().setHigh(size / 2f);
 			game.particle.addEffect(effect);
-			health -= circ.scale/5f;
-			
+			health -= circ.scale / 5f;
+
 			PooledEffect effect1 = game.circle.circleEffect.obtain();
 			effect1.setPosition(circ.x, circ.y);
 			effect1.getEmitters().get(0).getTint().setColors(new float[] {
@@ -408,19 +423,19 @@ public class PlayerSystem extends EntitySystem implements ContactListener {
 			});
 			effect1.getEmitters().get(0).getScale().setHigh(circ.scale);
 			game.particle.addEffect(effect1);
-			
+
 		}
-		
-		if(object2 instanceof CubeComponent) {
+
+		if (object2 instanceof CubeComponent) {
 			CubeComponent cube = (CubeComponent) object2;
 			cube.die = true;
-			
+
 			PooledEffect effect = triangleEffect.obtain();
 			effect.setPosition(0, 0);
-			effect.getEmitters().get(0).getScale().setHigh(size/2f);
+			effect.getEmitters().get(0).getScale().setHigh(size / 2f);
 			game.particle.addEffect(effect);
-			health -= cube.scale/5f;
-			
+			health -= cube.scale / 5f;
+
 			PooledEffect effect1 = game.cube.squareEffect.obtain();
 			effect1.setPosition(cube.x, cube.y);
 			effect1.getEmitters().get(0).getTint().setColors(new float[] {
@@ -428,7 +443,7 @@ public class PlayerSystem extends EntitySystem implements ContactListener {
 			});
 			effect1.getEmitters().get(0).getScale().setHigh(cube.scale);
 			game.particle.addEffect(effect1);
-			
+
 		}
 	}
 
