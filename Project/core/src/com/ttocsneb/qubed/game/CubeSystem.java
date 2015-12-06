@@ -34,7 +34,7 @@ public class CubeSystem extends EntitySystem implements ContactListener {
 	private GameScreen game;
 	private Engine engine;
 
-	private ParticleEffectPool squareEffect;
+	public ParticleEffectPool squareEffect;
 
 	public CubeSystem(GameScreen gs) {
 		game = gs;

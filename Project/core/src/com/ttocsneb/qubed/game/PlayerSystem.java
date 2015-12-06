@@ -2,10 +2,13 @@ package com.ttocsneb.qubed.game;
 
 import box2dLight.PointLight;
 
+import com.badlogic.ashley.core.Component;
 import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.EntitySystem;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.g2d.ParticleEffectPool;
+import com.badlogic.gdx.graphics.g2d.ParticleEffectPool.PooledEffect;
 import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
@@ -16,7 +19,9 @@ import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.World;
+import com.ttocsneb.qubed.game.contact.ContactListener;
 import com.ttocsneb.qubed.screen.GameScreen;
+import com.ttocsneb.qubed.util.Assets;
 
 /**
  * All logic for the Player.
@@ -24,10 +29,12 @@ import com.ttocsneb.qubed.screen.GameScreen;
  * @author TtocsNeb
  *
  */
-public class PlayerSystem extends EntitySystem {
+public class PlayerSystem extends EntitySystem implements ContactListener {
 
 	// WARNING: I have not updated the comments for this class, enter at your
 	// own risk!
+
+	private ParticleEffectPool triangleEffect;
 
 	private static final float COOLDOWN = 0.5f;
 	private static final float DELAY = 0.5f;
@@ -57,6 +64,9 @@ public class PlayerSystem extends EntitySystem {
 	public PlayerSystem(GameScreen gs) {
 		game = gs;
 
+		triangleEffect = new ParticleEffectPool(
+				Assets.instance.particles.triangleExp, 1, 5);
+
 		a = new Vector2();
 		b = new Vector2();
 		c = new Vector2();
@@ -77,9 +87,19 @@ public class PlayerSystem extends EntitySystem {
 		bdef.type = BodyType.KinematicBody;
 		bdef.position.set(0, 0);
 		body = world.createBody(bdef);
+		body.setUserData(new PlayerComponent());
 
 		fixture = null;
 		updateShape();
+	}
+
+	/**
+	 * This is a dummy class used for the physics engine
+	 * 
+	 * @author TtocsNeb
+	 *
+	 */
+	private class PlayerComponent implements Component {
 	}
 
 	private void updateShape() {
@@ -358,6 +378,63 @@ public class PlayerSystem extends EntitySystem {
 
 	public float getSize() {
 		return size;
+	}
+
+	// /////////////// ContactListener ///////////////////////
+
+	@Override
+	public Class<?> getComponentType() {
+		return PlayerComponent.class;
+	}
+
+	@Override
+	public void beginContact(Component object, Object object2) {
+		
+		
+		if(object2 instanceof CircleComponent) {
+			CircleComponent circ = (CircleComponent) object2;
+			circ.die = true;
+			
+			PooledEffect effect = triangleEffect.obtain();
+			effect.setPosition(0, 0);
+			effect.getEmitters().get(0).getScale().setHigh(size/2f);
+			game.particle.addEffect(effect);
+			health -= circ.scale/10f;
+			
+			PooledEffect effect1 = game.circle.circleEffect.obtain();
+			effect1.setPosition(circ.x, circ.y);
+			effect1.getEmitters().get(0).getTint().setColors(new float[] {
+					circ.color.r, circ.color.g, circ.color.b
+			});
+			effect1.getEmitters().get(0).getScale().setHigh(circ.scale);
+			game.particle.addEffect(effect1);
+			
+		}
+		
+		if(object2 instanceof CubeComponent) {
+			CubeComponent cube = (CubeComponent) object2;
+			cube.die = true;
+			
+			PooledEffect effect = triangleEffect.obtain();
+			effect.setPosition(0, 0);
+			effect.getEmitters().get(0).getScale().setHigh(size/2f);
+			game.particle.addEffect(effect);
+			health -= cube.scale/10f;
+			
+			PooledEffect effect1 = game.cube.squareEffect.obtain();
+			effect1.setPosition(cube.x, cube.y);
+			effect1.getEmitters().get(0).getTint().setColors(new float[] {
+					cube.color.r, cube.color.g, cube.color.b
+			});
+			effect1.getEmitters().get(0).getScale().setHigh(cube.scale);
+			game.particle.addEffect(effect1);
+			
+		}
+	}
+
+	@Override
+	public void endContact(Component object, Object object2) {
+
 	}
 
 }

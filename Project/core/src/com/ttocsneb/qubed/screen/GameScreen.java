@@ -129,7 +129,7 @@ public class GameScreen extends AbstractGameScreen implements InputProcessor {
 
 		particle = new ParticleSystem(this);
 
-		contactManager = new ContactManager(circle, bullet, cube);
+		contactManager = new ContactManager(circle, bullet, cube, player);
 		world.setContactListener(contactManager);
 
 	}

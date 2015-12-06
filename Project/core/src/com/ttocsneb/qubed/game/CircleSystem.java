@@ -34,7 +34,7 @@ public class CircleSystem extends EntitySystem implements ContactListener {
 	private GameScreen game;
 	private Engine engine;
 
-	private ParticleEffectPool circleEffect;
+	public ParticleEffectPool circleEffect;
 
 	public CircleSystem(GameScreen gs) {
 		game = gs;
