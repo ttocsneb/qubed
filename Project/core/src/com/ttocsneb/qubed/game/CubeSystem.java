@@ -167,6 +167,8 @@ public class CubeSystem extends EntitySystem implements ContactListener {
 		// Set it's velocity.
 		cc.body.setLinearVelocity(cc.velocity * MathUtils.cosDeg(cc.direction),
 				cc.velocity * MathUtils.sinDeg(cc.direction));
+		cc.body.setAngularVelocity((MathUtils.randomBoolean() ? -1 : 1)
+				* MathUtils.random(180, 360) * MathUtils.degreesToRadians);
 
 		// give it a shape.
 		updateShape(cc);

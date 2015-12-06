@@ -162,6 +162,8 @@ public class CircleSystem extends EntitySystem implements ContactListener {
 		//Set its velocity.
 		cc.body.setLinearVelocity(cc.velocity * MathUtils.cosDeg(cc.direction),
 				cc.velocity * MathUtils.sinDeg(cc.direction));
+		cc.body.setAngularVelocity((MathUtils.randomBoolean() ? -1 : 1)
+				* MathUtils.random(180, 360) * MathUtils.degreesToRadians);
 
 		//Set the shape.
 		updateShape(cc, cc.scale);

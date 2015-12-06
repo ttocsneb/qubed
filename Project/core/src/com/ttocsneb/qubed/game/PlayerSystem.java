@@ -399,7 +399,7 @@ public class PlayerSystem extends EntitySystem implements ContactListener {
 			effect.setPosition(0, 0);
 			effect.getEmitters().get(0).getScale().setHigh(size/2f);
 			game.particle.addEffect(effect);
-			health -= circ.scale/10f;
+			health -= circ.scale/5f;
 			
 			PooledEffect effect1 = game.circle.circleEffect.obtain();
 			effect1.setPosition(circ.x, circ.y);
@@ -419,7 +419,7 @@ public class PlayerSystem extends EntitySystem implements ContactListener {
 			effect.setPosition(0, 0);
 			effect.getEmitters().get(0).getScale().setHigh(size/2f);
 			game.particle.addEffect(effect);
-			health -= cube.scale/10f;
+			health -= cube.scale/5f;
 			
 			PooledEffect effect1 = game.cube.squareEffect.obtain();
 			effect1.setPosition(cube.x, cube.y);
