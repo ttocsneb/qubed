@@ -88,6 +88,8 @@ public class PlayerSystem extends EntitySystem implements ContactListener {
 		bdef.position.set(0, 0);
 		body = world.createBody(bdef);
 		body.setUserData(new PlayerComponent());
+		
+		size = 0.1f;                                              
 
 		fixture = null;
 		updateShape();
@@ -159,7 +161,7 @@ public class PlayerSystem extends EntitySystem implements ContactListener {
 	 * @return <b>true</b> if the player has died.
 	 */
 	public boolean died() {
-		return size <= 0;
+		return size <= 0.01f;
 	}
 
 	private Vector2 point(Vector2 a, Vector2 b, float percent) {

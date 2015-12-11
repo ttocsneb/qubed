@@ -93,6 +93,8 @@ public class GameScreen extends AbstractGameScreen implements InputProcessor {
 
 	@Override
 	public void show() {
+		died = false; 
+		
 		// Initialize Box2D.
 		Box2D.init();
 		world = new World(new Vector2(0, 0), true);
@@ -110,7 +112,7 @@ public class GameScreen extends AbstractGameScreen implements InputProcessor {
 		initCamera();
 
 		font = Assets.instance.fonts.huge;
-		gameOver = new GlyphLayout(font, "GAME OVER", Color.RED, 1080,
+		gameOver = new GlyphLayout(font, "GAME OVER", Global.RED, 1080,
 				Align.center, true);
 
 		// Don't allow the back button(on Android) to close the game.
@@ -172,21 +174,25 @@ public class GameScreen extends AbstractGameScreen implements InputProcessor {
 	private Color selectColor() {
 		switch (MathUtils.random(3)) {
 		case 0:
-			return new Color(250 / 255f, 128 / 255f, 40 / 255f, 1);
+			return Global.RED;
 		case 1:
-			return new Color(218 / 255f, 67 / 255f, 36 / 255f, 1);
+			return Global.ORANGE;
 		case 2:
-			return new Color(49 / 255f, 136 / 255f, 183 / 255f, 1);
+			return Global.BLUE;
 		case 3:
-			return new Color(63 / 255f, 193 / 255f, 91 / 255f, 1);
+			return Global.GREEN;
 		default:
 			return new Color(Color.BLACK);
 		}
 	}
 
+	private boolean died;
+	
 	@Override
 	public void render(float delta) {
-		// Clear the screen.
+		Gdx.app.debug("GameScreen", "Died: " + died);
+		
+		// Clear the screen.                                
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT
 				| GL20.GL_DEPTH_BUFFER_BIT
 				| (Gdx.graphics.getBufferFormat().coverageSampling ? GL20.GL_COVERAGE_BUFFER_BIT_NV
@@ -203,8 +209,12 @@ public class GameScreen extends AbstractGameScreen implements InputProcessor {
 					(Gdx.input.isKeyPressed(Keys.A) ? 5 : Gdx.input
 							.isKeyPressed(Keys.D) ? -5 : -orientation), -5, 5));
 		}
+		
+		if(player.died()) {
+			died = true;
+		}
 
-		if (!player.died() && Math.abs(orientation) > 0.5) {
+		if (!died && Math.abs(orientation) > 0.5) {
 			// Rotate the screen.
 			cam.rotate(-orientation);
 			rotation -= orientation;
@@ -215,6 +225,7 @@ public class GameScreen extends AbstractGameScreen implements InputProcessor {
 			}
 		}
 
+		
 		// Rotate the player.
 		player.setRotation(rotation);
 
@@ -267,6 +278,17 @@ public class GameScreen extends AbstractGameScreen implements InputProcessor {
 		// Draw the world debug, if in debug mode.
 		if (debug == true) worldRenderer.render(world, cam.combined);
 
+		if(died) {
+
+			Gdx.gl.glEnable(GL20.GL_BLEND);
+			Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
+			shape.setProjectionMatrix(hud.combined);
+			shape.begin(ShapeType.Filled);
+			shape.setColor(0, 0, 0, gameOverProg*0.5f);
+			shape.rect(0, 0, 1080, 1920);
+			shape.end();
+		}
+		
 		// Draw the GUI.
 		hud.update();
 		batch.setProjectionMatrix(hud.combined);
@@ -274,7 +296,7 @@ public class GameScreen extends AbstractGameScreen implements InputProcessor {
 		// //////////////////////////HUD BATCH/////////////////////////////
 
 		// Check if the player has died.
-		if (player.died()) {
+		if (died) {
 			// If the player has died, draw the game Over display.
 			gameOverProg = Math.min(gameOverProg + delta, 1);
 			float prog = Interpolation.sineOut.apply(gameOverProg);
@@ -285,16 +307,7 @@ public class GameScreen extends AbstractGameScreen implements InputProcessor {
 		// //////////////////////////HUD BATCH/////////////////////////////
 		batch.end();
 		
-		if(player.died()) {
-
-			Gdx.gl.glEnable(GL20.GL_BLEND);
-			Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
-			shape.setProjectionMatrix(hud.combined);
-			shape.begin(ShapeType.Filled);
-			shape.setColor(1, 0, 0, gameOverProg*0.5f);
-			shape.rect(0, 0, 1080, 1920);
-			shape.end();
-		}
+		
 
 	}
 
