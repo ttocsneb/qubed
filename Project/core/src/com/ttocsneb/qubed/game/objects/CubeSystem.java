@@ -1,4 +1,4 @@
-package com.ttocsneb.qubed.game;
+package com.ttocsneb.qubed.game.objects;
 
 import com.badlogic.ashley.core.Component;
 import com.badlogic.ashley.core.ComponentMapper;
@@ -65,6 +65,10 @@ public class CubeSystem extends EntitySystem implements ContactListener {
 
 				// Dispose of the dead body.
 				if (cube.scale <= 0) {
+					//remove the powerup if it has not already activated.
+					if(cube.powerup != null && !cube.powerup.hasStarted()) {
+						cube.powerup.remove();
+					}
 					game.world.destroyBody(cube.body);
 					engine.removeEntity(entity);
 					continue;
@@ -72,8 +76,8 @@ public class CubeSystem extends EntitySystem implements ContactListener {
 			} else {
 				// I'm still not sure why we need to update the positioning
 				// system.
-				cube.x = cube.body.getPosition().x;
-				cube.y = cube.body.getPosition().y;
+				cube.position.x = cube.body.getPosition().x;
+				cube.position.y = cube.body.getPosition().y;
 			}
 
 			// set the rotation, why can't we use the body directly?
@@ -83,12 +87,12 @@ public class CubeSystem extends EntitySystem implements ContactListener {
 			game.shape.setColor(cube.color);
 
 			// Draw the Cube.
-			game.shape.rect(cube.x - cube.scale / 2f, cube.y - cube.scale / 2f,
+			game.shape.rect(cube.position.x - cube.scale / 2f, cube.position.y - cube.scale / 2f,
 					cube.scale / 2f, cube.scale / 2f, cube.scale, cube.scale,
 					1, 1, cube.rotation);
 
 			// Kill the cube if it broke the barrier rule.
-			if (Math.pow(cube.x, 2) + Math.pow(cube.y, 2) >= 9f) {
+			if (Math.pow(cube.position.x, 2) + Math.pow(cube.position.y, 2) >= 9f) {
 				cube.die = true;
 			}
 
@@ -158,7 +162,7 @@ public class CubeSystem extends EntitySystem implements ContactListener {
 		BodyDef bdef = new BodyDef();
 
 		bdef.type = BodyType.DynamicBody;
-		bdef.position.set(cc.x, cc.y);
+		bdef.position.set(cc.position.x, cc.position.y);
 
 		// Create the body.
 		cc.body = game.world.createBody(bdef);
@@ -193,8 +197,12 @@ public class CubeSystem extends EntitySystem implements ContactListener {
 			((BulletComponent) object2).die = true;
 			cc.die = true;
 
+			if(cc.powerup != null) {
+				cc.powerup.activate();
+			}
+			
 			PooledEffect effect = squareEffect.obtain();
-			effect.setPosition(cc.x, cc.y);
+			effect.setPosition(cc.position.x, cc.position.y);
 			effect.getEmitters().get(0).getTint().setColors(new float[] {
 					cc.color.r, cc.color.g, cc.color.b
 			});

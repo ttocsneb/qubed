@@ -67,16 +67,18 @@ public class Assets implements Disposable, AssetErrorListener {
 	 */
 	public class AssetTextures {
 
-		public final AtlasRegion background;
 
 		public final AtlasRegion speaker;
 		public final AtlasRegion speakerOff;
 
-		public AssetTextures(TextureAtlas atlas) {
-			background = atlas.findRegion("Background");
+		public final AtlasRegion healthPowerup;
 
-			speaker = atlas.findRegion("speaker_on");
-			speakerOff = atlas.findRegion("speaker_off");
+		public AssetTextures(TextureAtlas atlas) {
+
+			speaker = atlas.findRegion("menu/speaker_on");
+			speakerOff = atlas.findRegion("menu/speaker_off");
+
+			healthPowerup = atlas.findRegion("game/healthPwr");
 		}
 	}
 
@@ -228,13 +230,12 @@ public class Assets implements Disposable, AssetErrorListener {
 	 * @return the progress in percent of completion.
 	 */
 	public float getProgress() {
-		//return 100% if the assets are loaded
+		// return 100% if the assets are loaded
 		if (loaded) return 1;
 
-		
 		assetManager.update();
-		
-		//return the progress if not yet loaded.
+
+		// return the progress if not yet loaded.
 		if (assetManager.getProgress() < 1) return assetManager.getProgress();
 
 		loaded = true;
@@ -261,8 +262,8 @@ public class Assets implements Disposable, AssetErrorListener {
 		// create game resource objects
 		sounds = new AssetSounds(assetManager);
 		textures = new AssetTextures(atlas);
-		atlases = new AssetAtlas(assetManager);
 		particles = new AssetParticles(atlas);
+		atlases = new AssetAtlas(assetManager);
 
 		fonts = new AssetFonts();
 		loaded = true;

@@ -1,41 +1,60 @@
 
 textures.png
-size: 256,128
+size: 128,64
 format: RGBA8888
 filter: Nearest,Nearest
 repeat: none
 circleParticle
   rotate: false
-  xy: 206, 70
+  xy: 2, 2
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-speaker_off
-  rotate: false
-  xy: 2, 2
-  size: 100, 100
-  orig: 100, 100
-  offset: 0, 0
-  index: -1
-speaker_on
-  rotate: false
-  xy: 104, 2
-  size: 100, 100
-  orig: 100, 100
-  offset: 0, 0
-  index: -1
 squareParticle
   rotate: false
-  xy: 206, 36
+  xy: 36, 2
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 triangleParticle
   rotate: false
-  xy: 206, 2
+  xy: 70, 2
   size: 32, 32
   orig: 32, 32
+  offset: 0, 0
+  index: -1
+
+textures2.png
+size: 256,256
+format: RGBA8888
+filter: Nearest,Nearest
+repeat: none
+game/healthPwr
+  rotate: false
+  xy: 2, 2
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: -1
+
+textures3.png
+size: 256,128
+format: RGBA8888
+filter: Nearest,Nearest
+repeat: none
+menu/speaker_off
+  rotate: false
+  xy: 2, 2
+  size: 100, 100
+  orig: 100, 100
+  offset: 0, 0
+  index: -1
+menu/speaker_on
+  rotate: false
+  xy: 104, 2
+  size: 100, 100
+  orig: 100, 100
   offset: 0, 0
   index: -1

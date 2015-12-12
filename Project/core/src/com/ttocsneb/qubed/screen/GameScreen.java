@@ -23,14 +23,16 @@ import com.badlogic.gdx.physics.box2d.Box2D;
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Align;
-import com.ttocsneb.qubed.game.BulletSystem;
-import com.ttocsneb.qubed.game.CircleComponent;
-import com.ttocsneb.qubed.game.CircleSystem;
-import com.ttocsneb.qubed.game.CubeComponent;
-import com.ttocsneb.qubed.game.CubeSystem;
-import com.ttocsneb.qubed.game.ParticleSystem;
-import com.ttocsneb.qubed.game.PlayerSystem;
 import com.ttocsneb.qubed.game.contact.ContactManager;
+import com.ttocsneb.qubed.game.objects.BulletSystem;
+import com.ttocsneb.qubed.game.objects.CircleComponent;
+import com.ttocsneb.qubed.game.objects.CircleSystem;
+import com.ttocsneb.qubed.game.objects.CubeComponent;
+import com.ttocsneb.qubed.game.objects.CubeSystem;
+import com.ttocsneb.qubed.game.objects.ParticleSystem;
+import com.ttocsneb.qubed.game.objects.PlayerSystem;
+import com.ttocsneb.qubed.game.powerups.HealthPowerup;
+import com.ttocsneb.qubed.game.powerups.PowerupSystem;
 import com.ttocsneb.qubed.screen.transitions.ScreenTransition;
 import com.ttocsneb.qubed.screen.transitions.ScreenTransitionSlide;
 import com.ttocsneb.qubed.util.Assets;
@@ -53,6 +55,7 @@ public class GameScreen extends AbstractGameScreen implements InputProcessor {
 	public PlayerSystem player;
 	public BulletSystem bullet;
 	public ParticleSystem particle;
+	public PowerupSystem powerup;
 
 	// The contact manager simplifies Box2D contact events.
 	ContactManager contactManager;
@@ -93,8 +96,8 @@ public class GameScreen extends AbstractGameScreen implements InputProcessor {
 
 	@Override
 	public void show() {
-		died = false; 
-		
+		died = false;
+
 		// Initialize Box2D.
 		Box2D.init();
 		world = new World(new Vector2(0, 0), true);
@@ -143,6 +146,8 @@ public class GameScreen extends AbstractGameScreen implements InputProcessor {
 
 		particle = new ParticleSystem(this);
 
+		powerup = new PowerupSystem(this);
+
 		contactManager = new ContactManager(circle, bullet, cube, player);
 		world.setContactListener(contactManager);
 
@@ -187,18 +192,16 @@ public class GameScreen extends AbstractGameScreen implements InputProcessor {
 	}
 
 	private boolean died;
-	
+
 	@Override
 	public void render(float delta) {
-		Gdx.app.debug("GameScreen", "Died: " + died);
-		
-		// Clear the screen.                                
+
+		// Clear the screen.
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT
 				| GL20.GL_DEPTH_BUFFER_BIT
 				| (Gdx.graphics.getBufferFormat().coverageSampling ? GL20.GL_COVERAGE_BUFFER_BIT_NV
 						: 0));
 
-		
 		if (Gdx.app.getType() != ApplicationType.Desktop) {
 			// Rotate the screen using buttons if on desktop.
 			orientation = Math.max(Math.min(Gdx.input.getAccelerometerX(), 5),
@@ -209,8 +212,8 @@ public class GameScreen extends AbstractGameScreen implements InputProcessor {
 					(Gdx.input.isKeyPressed(Keys.A) ? 5 : Gdx.input
 							.isKeyPressed(Keys.D) ? -5 : -orientation), -5, 5));
 		}
-		
-		if(player.died()) {
+
+		if (player.died()) {
 			died = true;
 		}
 
@@ -225,7 +228,6 @@ public class GameScreen extends AbstractGameScreen implements InputProcessor {
 			}
 		}
 
-		
 		// Rotate the player.
 		player.setRotation(rotation);
 
@@ -266,7 +268,9 @@ public class GameScreen extends AbstractGameScreen implements InputProcessor {
 		batch.setProjectionMatrix(cam.combined);
 		batch.begin();
 		// ///////////////////////////GAME BATCH///////////////////////////
+
 		particle.update(delta);
+		powerup.update(delta);
 
 		// ///////////////////////////GAME BATCH///////////////////////////
 		batch.end();
@@ -278,17 +282,17 @@ public class GameScreen extends AbstractGameScreen implements InputProcessor {
 		// Draw the world debug, if in debug mode.
 		if (debug == true) worldRenderer.render(world, cam.combined);
 
-		if(died) {
+		if (died) {
 
 			Gdx.gl.glEnable(GL20.GL_BLEND);
 			Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
 			shape.setProjectionMatrix(hud.combined);
 			shape.begin(ShapeType.Filled);
-			shape.setColor(0, 0, 0, gameOverProg*0.5f);
+			shape.setColor(0, 0, 0, gameOverProg * 0.5f);
 			shape.rect(0, 0, 1080, 1920);
 			shape.end();
 		}
-		
+
 		// Draw the GUI.
 		hud.update();
 		batch.setProjectionMatrix(hud.combined);
@@ -301,13 +305,12 @@ public class GameScreen extends AbstractGameScreen implements InputProcessor {
 			gameOverProg = Math.min(gameOverProg + delta, 1);
 			float prog = Interpolation.sineOut.apply(gameOverProg);
 
-			font.draw(batch, gameOver, 0, 1920-(960 + gameOver.height*0.25f)*prog + gameOver.height);
+			font.draw(batch, gameOver, 0, 1920
+					- (960 + gameOver.height * 0.25f) * prog + gameOver.height);
 		}
 
 		// //////////////////////////HUD BATCH/////////////////////////////
 		batch.end();
-		
-		
 
 	}
 
@@ -317,8 +320,8 @@ public class GameScreen extends AbstractGameScreen implements InputProcessor {
 	private void spawnCube() {
 		CubeComponent cubeComp = new CubeComponent();
 		int rot = MathUtils.random(360);
-		cubeComp.x = 2.9f * MathUtils.cosDeg(rot);
-		cubeComp.y = 2.9f * MathUtils.sinDeg(rot);
+		cubeComp.position.x = 2.9f * MathUtils.cosDeg(rot);
+		cubeComp.position.y = 2.9f * MathUtils.sinDeg(rot);
 		cubeComp.direction = MathUtils.randomBoolean(.6f) ? (rot - 180 < 0 ? rot + 180
 				: rot - 180)
 				: (MathUtils.random(
@@ -327,6 +330,12 @@ public class GameScreen extends AbstractGameScreen implements InputProcessor {
 		cubeComp.velocity = MathUtils.random(0.5f, 1);
 		cubeComp.scale = MathUtils.random(0.5f, 0.9f);
 		cubeComp.color = selectColor();
+		// Add a health boos powerup 3/10 of the time.
+		if (MathUtils.randomBoolean(0.30f)) {
+			cubeComp.powerup = new HealthPowerup(cubeComp, MathUtils.random(
+					0.5f, 2f), player);
+			powerup.addPowerup(cubeComp.powerup);
+		}
 
 		cube.addCube(cubeComp);
 
@@ -338,8 +347,8 @@ public class GameScreen extends AbstractGameScreen implements InputProcessor {
 	private void spawnCircle() {
 		CircleComponent circComp = new CircleComponent();
 		int rot = MathUtils.random(360);
-		circComp.x = 2.9f * MathUtils.cosDeg(rot);
-		circComp.y = 2.9f * MathUtils.sinDeg(rot);
+		circComp.position.x = 2.9f * MathUtils.cosDeg(rot);
+		circComp.position.y = 2.9f * MathUtils.sinDeg(rot);
 		circComp.direction = MathUtils.randomBoolean(.6f) ? (rot - 180 < 0 ? rot + 180
 				: rot - 180)
 				: (MathUtils.random(
@@ -348,6 +357,12 @@ public class GameScreen extends AbstractGameScreen implements InputProcessor {
 		circComp.velocity = MathUtils.random(0.5f, 1);
 		circComp.scale = MathUtils.random(0.25f, 0.75f);
 		circComp.color = selectColor();
+		// Add a health boos powerup 3/10 of the time.
+		if (MathUtils.randomBoolean(0.30f)) {
+			circComp.powerup = new HealthPowerup(circComp, MathUtils.random(
+					0.5f, 2f), player);
+			powerup.addPowerup(circComp.powerup);
+		}
 		circle.addCircle(circComp);
 	}
 

@@ -1,4 +1,4 @@
-package com.ttocsneb.qubed.game;
+package com.ttocsneb.qubed.game.objects;
 
 import com.badlogic.ashley.core.Component;
 import com.badlogic.ashley.core.ComponentMapper;
@@ -62,8 +62,8 @@ public class BulletSystem extends EntitySystem implements ContactListener {
 			BulletComponent bullet = bc.get(entity);
 
 			// Update the bullet position. Note: I'm not sure why we do this.
-			bullet.x = bullet.body.getPosition().x;
-			bullet.y = bullet.body.getPosition().y;
+			bullet.position.x = bullet.body.getPosition().x;
+			bullet.position.y = bullet.body.getPosition().y;
 
 			// Kill the bullet if it is suppost to die.
 			if (bullet.die) {
@@ -89,11 +89,11 @@ public class BulletSystem extends EntitySystem implements ContactListener {
 					a.x * MathUtils.sinDeg(120) + (a.y * MathUtils.cosDeg(120)));
 
 			// Draw the bullet.
-			game.shape.triangle(bullet.x + a.x, bullet.y + a.y, bullet.x + b.x,
-					bullet.y + b.y, bullet.x + c.x, bullet.y + c.y);
+			game.shape.triangle(bullet.position.x + a.x, bullet.position.y + a.y, bullet.position.x + b.x,
+					bullet.position.y + b.y, bullet.position.x + c.x, bullet.position.y + c.y);
 
 			// Die when the bullet leaves the world.
-			if (Math.pow(bullet.x, 2) + Math.pow(bullet.y, 2) >= 8.41f) {
+			if (Math.pow(bullet.position.x, 2) + Math.pow(bullet.position.y, 2) >= 8.41f) {
 				bullet.die = true;
 			}
 		}
@@ -113,7 +113,7 @@ public class BulletSystem extends EntitySystem implements ContactListener {
 		// Make the Body for the bullet.
 		BodyDef bdef = new BodyDef();
 		bdef.type = BodyType.DynamicBody;
-		bdef.position.set(bc.x, bc.y);
+		bdef.position.set(bc.position.x, bc.position.y);
 		bdef.angle = (360 - bc.rotation) * MathUtils.degreesToRadians;
 
 		// Create the Body.

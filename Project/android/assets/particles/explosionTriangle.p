@@ -137,4 +137,4 @@ additive: false
 behind: false
 premultipliedAlpha: false
 - Image Path -
-triangleParticle.png
+game\triangleParticle

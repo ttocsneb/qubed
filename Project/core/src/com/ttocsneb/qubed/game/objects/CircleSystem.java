@@ -1,4 +1,4 @@
-package com.ttocsneb.qubed.game;
+package com.ttocsneb.qubed.game.objects;
 
 import com.badlogic.ashley.core.Component;
 import com.badlogic.ashley.core.ComponentMapper;
@@ -106,6 +106,11 @@ public class CircleSystem extends EntitySystem implements ContactListener {
 
 				// Remove the body.
 				if (circle.scale <= 0) {
+					//remove the powerup if it has not already activated.
+					if(circle.powerup != null && !circle.powerup.hasStarted()) {
+						circle.powerup.remove();
+					}
+					
 					engine.removeEntity(entity);
 					game.world.destroyBody(circle.body);
 					continue;
@@ -113,18 +118,18 @@ public class CircleSystem extends EntitySystem implements ContactListener {
 			} else {
 				// update the circles position; Note: I don't know why we use
 				// this code.
-				circle.x = circle.body.getPosition().x;
-				circle.y = circle.body.getPosition().y;
+				circle.position.x = circle.body.getPosition().x;
+				circle.position.y = circle.body.getPosition().y;
 			}
 
 			// Set the color to draw the circle.
 			game.shape.setColor(circle.color);
 
 			// Draw the circle
-			game.shape.circle(circle.x, circle.y, 0.5f * circle.scale, 25);
+			game.shape.circle(circle.position.x, circle.position.y, 0.5f * circle.scale, 25);
 
 			// If the circle goes out of bounds, kill it.
-			if (Math.pow(circle.x, 2) + Math.pow(circle.y, 2) >= 9f) {
+			if (Math.pow(circle.position.x, 2) + Math.pow(circle.position.y, 2) >= 9f) {
 				circle.die = true;
 			}
 
@@ -153,7 +158,7 @@ public class CircleSystem extends EntitySystem implements ContactListener {
 		BodyDef bdef = new BodyDef();
 
 		bdef.type = BodyType.DynamicBody;
-		bdef.position.set(cc.x, cc.y);
+		bdef.position.set(cc.position.x, cc.position.y);
 
 		//Create the body.
 		cc.body = game.world.createBody(bdef);
@@ -176,9 +181,14 @@ public class CircleSystem extends EntitySystem implements ContactListener {
 		// Kill the circle if it touches a bullet.
 		if (object2 instanceof BulletComponent) {
 			((BulletComponent) object2).die = true;
+			
+			if(cc.powerup != null) {
+				cc.powerup.activate();
+			}
+			
 			cc.die = true;
 			PooledEffect effect = circleEffect.obtain();
-			effect.setPosition(cc.x, cc.y);
+			effect.setPosition(cc.position.x, cc.position.y);
 			effect.getEmitters().get(0).getTint().setColors(new float[] {
 					cc.color.r, cc.color.g, cc.color.b
 			});

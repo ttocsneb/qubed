@@ -1,4 +1,4 @@
-package com.ttocsneb.qubed.game;
+package com.ttocsneb.qubed.game.objects;
 
 import box2dLight.PointLight;
 
@@ -205,8 +205,8 @@ public class PlayerSystem extends EntitySystem implements ContactListener {
 			coolDown = COOLDOWN;
 			delay = DELAY;
 			BulletComponent c = new BulletComponent();
-			c.x = a.x;
-			c.y = a.y;
+			c.position.x = a.x;
+			c.position.y = a.y;
 
 			c.rotation = rotation;
 
@@ -419,7 +419,7 @@ public class PlayerSystem extends EntitySystem implements ContactListener {
 			health -= circ.scale / 5f;
 
 			PooledEffect effect1 = game.circle.circleEffect.obtain();
-			effect1.setPosition(circ.x, circ.y);
+			effect1.setPosition(circ.position.x, circ.position.y);
 			effect1.getEmitters().get(0).getTint().setColors(new float[] {
 					circ.color.r, circ.color.g, circ.color.b
 			});
@@ -439,7 +439,7 @@ public class PlayerSystem extends EntitySystem implements ContactListener {
 			health -= cube.scale / 5f;
 
 			PooledEffect effect1 = game.cube.squareEffect.obtain();
-			effect1.setPosition(cube.x, cube.y);
+			effect1.setPosition(cube.position.x, cube.position.y);
 			effect1.getEmitters().get(0).getTint().setColors(new float[] {
 					cube.color.r, cube.color.g, cube.color.b
 			});

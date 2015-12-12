@@ -1,4 +1,4 @@
-package com.ttocsneb.qubed.game;
+package com.ttocsneb.qubed.game.objects;
 
 import com.badlogic.ashley.core.EntitySystem;
 import com.badlogic.gdx.graphics.g2d.ParticleEffectPool.PooledEffect;
