@@ -16,6 +16,8 @@ import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
 import com.badlogic.gdx.physics.box2d.CircleShape;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.ttocsneb.qubed.game.contact.ContactListener;
+import com.ttocsneb.qubed.game.objects.components.BulletComponent;
+import com.ttocsneb.qubed.game.objects.components.CircleComponent;
 import com.ttocsneb.qubed.screen.GameScreen;
 import com.ttocsneb.qubed.util.Assets;
 
