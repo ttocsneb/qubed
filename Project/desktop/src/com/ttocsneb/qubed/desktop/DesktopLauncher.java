@@ -9,37 +9,38 @@ import com.badlogic.gdx.tools.texturepacker.TexturePacker.Settings;
 import com.ttocsneb.qubed.Main;
 
 public class DesktopLauncher {
-	
+
 	private static final boolean pack = false, debug = false;
 	private static final String textureDir = "../../Raw";
-	
-	public static void main (String[] arg) {
-		
-		//check if we should re-pack the textures, and if the directory is valid.
-		if(pack) {
+
+	public static void main(String[] arg) {
+
+		// check if we should re-pack the textures, and if the directory is
+		// valid.
+		if (pack) {
 			if (new File(textureDir).isDirectory() == true) {
-				
-				//Go through the items of the texture folder
-				for(File file : new File(textureDir).listFiles()) {
-					//check if the file is a directory
-					if(file.isDirectory()) {
-						//Pack the textures in the current directory
-						Settings settings = new Settings();
-						settings.debug = debug;
+				Settings settings = new Settings();
+				settings.maxHeight = 1024;
+				settings.maxWidth = 1024;
+				settings.debug = debug;
+
+				// Go through the items of the texture folder
+				for (File file : new File(textureDir).listFiles()) {
+					// check if the file is a directory
+					if (file.isDirectory()) {
+						// Pack the textures in the current directory
 						TexturePacker.process(settings, file.getPath(),
-								"../android/assets/textures",
-								file.getPath().substring(textureDir.length()+1));
+								"../android/assets/textures", file.getPath()
+										.substring(textureDir.length() + 1));
 					}
 				}
-				
+
 				System.out.println("Done!");
-				
-			}
-			
-			System.out.println(textureDir + " is not a directory!");
+
+			} else System.out.println(textureDir + " is not a directory!");
 		} else {
-		
-			//Start the application.
+
+			// Start the application.
 			LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();
 			config.width = 394;
 			config.height = 700;
