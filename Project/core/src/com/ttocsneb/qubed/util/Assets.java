@@ -13,6 +13,7 @@ import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas.AtlasRegion;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter;
+import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.utils.Disposable;
 
 /**
@@ -35,9 +36,11 @@ public class Assets implements Disposable, AssetErrorListener {
 	public AssetFonts fonts;
 	public AssetAtlas atlases;
 	public AssetParticles particles;
+	
+	public Skin skin;
 
 	private static final String[] ATLASES = {
-		"skins/uiskin.atlas"
+		"textures/uiskin.atlas"
 	};
 
 	/**
@@ -55,6 +58,7 @@ public class Assets implements Disposable, AssetErrorListener {
 			textures = am.get(Global.TEXTURE_ATLAS);
 
 			uiskin = am.get(ATLASES[0]);
+			skin = new Skin(Gdx.files.internal("textures/uiskin.json"), uiskin);
 		}
 
 	}
