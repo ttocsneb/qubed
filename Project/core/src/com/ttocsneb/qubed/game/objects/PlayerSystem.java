@@ -20,6 +20,9 @@ import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.World;
 import com.ttocsneb.qubed.game.contact.ContactListener;
+import com.ttocsneb.qubed.game.objects.components.BulletComponent;
+import com.ttocsneb.qubed.game.objects.components.CircleComponent;
+import com.ttocsneb.qubed.game.objects.components.CubeComponent;
 import com.ttocsneb.qubed.screen.GameScreen;
 import com.ttocsneb.qubed.util.Assets;
 

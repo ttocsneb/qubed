@@ -9,16 +9,15 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
+import com.badlogic.gdx.input.GestureDetector;
 import com.badlogic.gdx.input.GestureDetector.GestureListener;
 import com.badlogic.gdx.math.Interpolation;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
-import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
-import com.badlogic.gdx.utils.Scaling;
-import com.badlogic.gdx.utils.viewport.ScalingViewport;
 import com.ttocsneb.qubed.screen.transitions.ScreenTransition;
 import com.ttocsneb.qubed.screen.transitions.ScreenTransitionSlide;
 import com.ttocsneb.qubed.util.Assets;
@@ -32,12 +31,7 @@ import com.ttocsneb.qubed.util.Global;
  */
 public class MenuScreen extends AbstractGameScreen implements GestureListener {
 
-	private static final float StageX = 360;
-	private static final float StageY = 640;
-	
-	
 	// Renderer
-	private Stage stage;
 	private SpriteBatch batch;
 	private ShapeRenderer shape;
 
@@ -47,6 +41,16 @@ public class MenuScreen extends AbstractGameScreen implements GestureListener {
 
 	// Camera
 	private OrthographicCamera cam;
+
+	// Sound stuffs.
+	private TextureRegion speaker;
+	private TextureRegion speakerOff;
+	private boolean touched;
+
+	// Arrow Animation Variables.
+	private float animInterp;
+	private int animProgress;
+	private boolean animDir;
 
 	// Camera position.
 	private float x;
@@ -63,34 +67,34 @@ public class MenuScreen extends AbstractGameScreen implements GestureListener {
 	@Override
 	public void show() {
 
-		stage = new Stage(new ScalingViewport(Scaling.stretch, StageX, StageY), Global.batch);
-		initStage();
-		batch = Global.batch;
-		cam = new OrthographicCamera();
-		cam.setToOrtho(false, 1080, 1920);
-		
+		// Load assets.
+		speaker = Assets.instance.textures.speaker;
+		speakerOff = Assets.instance.textures.speakerOff;
+
 		// Load fonts.
 		font = Assets.instance.fonts.huge;
-		font.setColor(Color.DARK_GRAY);
+		font.setColor(Color.BLACK);
 
 		// Create the Title
 		title = new GlyphLayout(font, "QUBED");
 
+		// Init the Camera.
+		cam = new OrthographicCamera();
+		cam.setToOrtho(false, 1080, 1920);
+
 		// Init the renderers.
+		batch = Global.batch;
 		shape = Global.shape;
 
 		// Initiate arrow animation variables
+		animProgress = 0;
+		animInterp = 0;
+		animDir = true;
+
 		Gdx.app.debug(
 				"MenuScreen",
 				Gdx.input.isPeripheralAvailable(Peripheral.Accelerometer) ? "This device has an accelerometer"
 						: "This device does not have an accelerometer");
-	}
-	
-	private void initStage() {
-		TextButton b = new TextButton("PLAY", Assets.instance.skin);
-		b.setPosition(StageX/2-b.getWidth()/2, StageY/2);
-		
-		stage.addActor(b);
 	}
 
 	@Override
@@ -101,24 +105,84 @@ public class MenuScreen extends AbstractGameScreen implements GestureListener {
 				| (Gdx.graphics.getBufferFormat().coverageSampling ? GL20.GL_COVERAGE_BUFFER_BIT_NV
 						: 0));
 
-		stage.act(delta);
+		// Move the Camera.
+		cam.position.set(cam.position.lerp(
+				new Vector3(MathUtils.clamp(x + 540, 540, 1080 + 540),
+						cam.position.y, cam.position.z), delta * 10));
 
-		//Draw the background
+		// Progress the animation Interpolation
+		animInterp += (animDir ? -1 : 1) * delta;
+		// Switch the direction of interpolation when the limit is reached.
+		if (animInterp >= 1 || animInterp <= 0) {
+			animDir = !animDir;
+			animInterp = MathUtils.clamp(animInterp, 0, 1);
+		}
+		// Apply interpolation to the animation progress variable to be used for
+		// renderering.
+		animProgress = MathUtils
+				.round(Interpolation.pow2.apply(animInterp) * 64);
+
+		cam.update();
 		shape.setProjectionMatrix(cam.combined);
 		shape.begin(ShapeType.Filled);
+		// ///////////////////////Shape Renderer////////////////////////////////
+
+		// Draw the White Background
 		shape.setColor(Color.WHITE);
-		shape.rect(cam.position.x - cam.viewportWidth / 2, cam.position.y
-				- cam.viewportHeight / 2, cam.viewportWidth, cam.viewportHeight);
+		shape.rect(0, 0, 2160, 1920);
+
+		// Draw the arrow to the screen.
+		shape.setColor(Color.BLACK);
+		shape.triangle(885 + animProgress,
+				1920 / 2 - 64 - (animProgress / 64f * 32), 885 + animProgress,
+				1920 / 2 + 64 + (animProgress / 64f * 32),
+				885 + animProgress + 128, 1920 / 2);
+
+		// ///////////////////////Shape Renderer////////////////////////////////
 		shape.end();
-		
-		//Draw the title
+
+		if (Gdx.input.isTouched()) {
+			// Convert screen pixels to camera pixels.
+			Vector3 v3 = cam.unproject(new Vector3(Gdx.input.getX(), Gdx.input
+					.getY(), 0));
+			// Detect Touch Events.
+			if (!touched && v3.x > 0 && v3.x < speaker.getRegionWidth()
+					&& v3.y > 1920 - speaker.getRegionHeight() && v3.y < 1920) {
+				touched = true;
+			} else if (touched
+					&& !(v3.x > 0 && v3.x < speaker.getRegionWidth()
+							&& v3.y > 1920 - speaker.getRegionHeight() && v3.y < 1920))
+				touched = false;
+		} else if (touched) {
+			// Activate/deactivate the music.
+			touched = false;
+			Global.Config.MUTE = !Global.Config.MUTE;
+			if (Global.Config.MUTE)
+				Assets.instance.sounds.music.pause();
+			else Assets.instance.sounds.music.play();
+			Global.Config.save();
+		}
+
+		cam.update();
 		batch.setProjectionMatrix(cam.combined);
 		batch.begin();
-			font.draw(batch, title, 540-title.width/2/*(1920/2)*/, 1680/*(1920*7/8)*/);
+		// ///////////////////////Batch Renderer////////////////////////////////
+
+		// Draw the title to the screen.
+		font.draw(batch, title, 1080 / 2 - title.width / 2, 1920 * 3 / 4f);
+
+		Assets.instance.fonts.med.setColor(Color.BLACK);
+
+		// Draw the speaker.
+		TextureRegion region = Global.Config.MUTE ? speakerOff : speaker;
+		batch.draw(region.getTexture(), 0, 1920 - region.getRegionHeight(), 0,
+				0, region.getRegionWidth(), region.getRegionHeight(), 1, 1, 0,
+				region.getRegionX(), region.getRegionY(),
+				region.getRegionWidth(), region.getRegionHeight(), false, false);
+
+		// ///////////////////////Batch Renderer////////////////////////////////
 		batch.end();
-		
-		stage.draw();
-		
+
 	}
 
 	@Override
@@ -138,7 +202,7 @@ public class MenuScreen extends AbstractGameScreen implements GestureListener {
 
 	@Override
 	public InputProcessor getInputProcessor() {
-		return stage;
+		return new GestureDetector(this);
 	}
 
 	// //////////////////////////////////////////////
