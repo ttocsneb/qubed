@@ -1,6 +1,7 @@
 package com.ttocsneb.qubed.game.powerups;
 
 import com.badlogic.ashley.core.EntitySystem;
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.utils.Array;
@@ -24,11 +25,34 @@ public class PowerupSystem extends EntitySystem {
 	}
 
 	/**
+	 * Get the Combined color of all active powerups.
+	 * @return Color
+	 */
+	public Color getColor() {
+		//Start out with a white color
+		Color c = new Color(1, 1, 1, 1);
+		boolean active = false;
+		
+		//Go through each powerup and check if it is active.
+		for(Powerup p : objects) {
+			if(p.isActive()) {
+				//If it is multiply the current color by the powerup's color.
+				c = c.mul(p.getColor());
+				active = true;
+			}
+		}
+		
+		//If at least one powerup is active return the color, if not, return black.
+		return active ? c : Color.BLACK;
+	}
+	
+	/**
 	 * Add a powerup to the game.
 	 * 
 	 * @param powerup
 	 */
 	public void addPowerup(Powerup powerup) {
+		Gdx.app.debug("PowerupSystem", "Added powerup! size is now " + objects.size);
 		objects.add(powerup);
 	}
 
@@ -55,6 +79,7 @@ public class PowerupSystem extends EntitySystem {
 				powerup.stop();
 				objects.removeValue(powerup, true);
 				powerup = null;
+				Gdx.app.debug("PowerupSystem", "Removed powerup! Size is now " + objects.size);
 				continue;
 			}
 

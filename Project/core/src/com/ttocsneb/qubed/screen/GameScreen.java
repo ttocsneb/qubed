@@ -47,6 +47,9 @@ import com.ttocsneb.qubed.util.Global;
  */
 public class GameScreen extends AbstractGameScreen implements InputProcessor {
 
+	//This is the length from one corner of the viewport to the other which is used for background rendering.
+	private static float ViewPortSize = (float)Math.sqrt(Math.pow(Global.VIEWPORT_GUI_HEIGHT, 2)*2);
+	
 	private Engine engine;
 
 	// Game Systems, where all of the logic lie
@@ -67,6 +70,8 @@ public class GameScreen extends AbstractGameScreen implements InputProcessor {
 	// The Renderers for the game.
 	public SpriteBatch batch;
 	public ShapeRenderer shape;
+	
+	private Color background;
 
 	// The Box2D world.
 	public World world;
@@ -110,6 +115,8 @@ public class GameScreen extends AbstractGameScreen implements InputProcessor {
 		lights.setAmbientLight(0.9f);
 		new DirectionalLight(lights, 1024, new Color(1, 1, 1, 0.1f), -45);
 
+		background = new Color(0, 0, 0, 1);
+		
 		initEngine();
 
 		initCamera();
@@ -252,9 +259,27 @@ public class GameScreen extends AbstractGameScreen implements InputProcessor {
 		shape.setProjectionMatrix(cam.combined);
 		shape.begin(ShapeType.Filled);
 		// ////////////////////////////SHAPE RENDERER//////////////////////
-
-		shape.setColor(Color.BLACK);
-		shape.rect(0, 0, Global.VIEWPORT_WIDTH, Global.VIEWPORT_GUI_HEIGHT);
+		
+		//Smoothly interpolate the current background color to the desired color.
+		
+		//Get the powerup colors.
+		Color tmp = powerup.getColor();
+		//Set the color step to 0.0666 (Full change in 0.25 seconds).
+		final float stp = 0.0666f;
+		
+		//step each color value of the background to the powerup color.
+		if(Math.abs(background.r-tmp.r) <= stp) background.r = tmp.r;
+		else background.r += background.r > tmp.r ? -stp : stp;
+		
+		if(Math.abs(background.g-tmp.g) <= stp) background.g = tmp.g;
+		else background.g += background.g > tmp.g ? -stp : stp;
+		
+		if(Math.abs(background.b-tmp.b) <= stp) background.b = tmp.b;
+		else background.b += background.b > tmp.b ? -stp : stp;
+		
+		//Set the background color, and draw it.
+		shape.setColor(background);
+		shape.rect(-ViewPortSize/2, -ViewPortSize/2, ViewPortSize, ViewPortSize);
 
 		shape.setColor(Color.WHITE);
 		shape.circle(0, 0, 3, 100);

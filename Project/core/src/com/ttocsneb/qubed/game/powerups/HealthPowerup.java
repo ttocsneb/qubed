@@ -1,8 +1,10 @@
 package com.ttocsneb.qubed.game.powerups;
 
+import com.badlogic.gdx.graphics.Color;
 import com.ttocsneb.qubed.game.objects.GameObject;
 import com.ttocsneb.qubed.game.objects.PlayerSystem;
 import com.ttocsneb.qubed.util.Assets;
+import com.ttocsneb.qubed.util.Global;
 
 
 public class HealthPowerup extends Powerup {
@@ -28,6 +30,11 @@ public class HealthPowerup extends Powerup {
 	@Override
 	public void end() {
 		
+	}
+
+	@Override
+	public Color getColor() {
+		return Global.GREEN;
 	}
 
 }

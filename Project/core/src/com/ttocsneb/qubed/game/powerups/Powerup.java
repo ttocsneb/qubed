@@ -1,5 +1,6 @@
 package com.ttocsneb.qubed.game.powerups;
 
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.ttocsneb.qubed.game.objects.GameObject;
 
@@ -138,5 +139,11 @@ public abstract class Powerup {
 	 * End the Powerup.
 	 */
 	public abstract void end();
+
+	/**
+	 * Get the color that represents this powerup.
+	 * @return Color
+	 */
+	public abstract Color getColor();
 
 }
