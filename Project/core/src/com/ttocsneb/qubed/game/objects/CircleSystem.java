@@ -62,35 +62,35 @@ public class CircleSystem extends EntitySystem implements ContactListener {
 	 *            The size of the circle.
 	 */
 	private void updateShape(CircleComponent cc, float size) {
-		//Remove any existing shapes.
+		// Remove any existing shapes.
 		if (cc.fixture != null && cc.fixture.getBody() != null) {
 			cc.body.destroyFixture(cc.fixture);
 			cc.fixture = null;
 		}
 
-		//Don't try to create a shape, that shouldn't exist.
+		// Don't try to create a shape, that shouldn't exist.
 		if (size < 0.001f) {
 			return;
 		}
 
-		//Make a fixture
+		// Make a fixture
 		FixtureDef fdef = new FixtureDef();
 
 		fdef.density = 0.1f;
 		fdef.friction = 0.2f;
 		fdef.restitution = 0.5f;
 
-		//Create the shape.
+		// Create the shape.
 		CircleShape shape = new CircleShape();
 		shape.setRadius(size / 2f);
 		shape.setPosition(new Vector2(0, 0));
 
 		fdef.shape = shape;
 
-		//Create the fixture.
+		// Create the fixture.
 		cc.fixture = cc.body.createFixture(fdef);
 
-		//dispose of the shape.
+		// dispose of the shape.
 		shape.dispose();
 
 	}
@@ -108,11 +108,14 @@ public class CircleSystem extends EntitySystem implements ContactListener {
 
 				// Remove the body.
 				if (circle.scale <= 0) {
-					//remove the powerup if it has not already activated.
-					if(circle.powerup != null && !circle.powerup.hasStarted()) {
+					// remove the powerup if it has not already activated.
+					if (circle.powerup != null && !circle.powerup.hasStarted()) {
 						circle.powerup.remove();
 					}
-					
+
+					if (circle.killed)
+						game.addScore((int) (circle.getSize() * 100f) + 10);
+
 					engine.removeEntity(entity);
 					game.world.destroyBody(circle.body);
 					continue;
@@ -128,7 +131,8 @@ public class CircleSystem extends EntitySystem implements ContactListener {
 			game.shape.setColor(circle.color);
 
 			// Draw the circle
-			game.shape.circle(circle.position.x, circle.position.y, 0.5f * circle.scale, 25);
+			game.shape.circle(circle.position.x, circle.position.y,
+					0.5f * circle.scale, 25);
 
 			// If the circle goes out of bounds, kill it.
 			if (Math.pow(circle.position.x, 2) + Math.pow(circle.position.y, 2) >= 9f) {
@@ -162,17 +166,17 @@ public class CircleSystem extends EntitySystem implements ContactListener {
 		bdef.type = BodyType.DynamicBody;
 		bdef.position.set(cc.position.x, cc.position.y);
 
-		//Create the body.
+		// Create the body.
 		cc.body = game.world.createBody(bdef);
 		cc.body.setUserData(cc);
 
-		//Set its velocity.
+		// Set its velocity.
 		cc.body.setLinearVelocity(cc.velocity * MathUtils.cosDeg(cc.direction),
 				cc.velocity * MathUtils.sinDeg(cc.direction));
 		cc.body.setAngularVelocity((MathUtils.randomBoolean() ? -1 : 1)
 				* MathUtils.random(180, 360) * MathUtils.degreesToRadians);
 
-		//Set the shape.
+		// Set the shape.
 		updateShape(cc, cc.scale);
 	}
 
@@ -182,18 +186,23 @@ public class CircleSystem extends EntitySystem implements ContactListener {
 
 		// Kill the circle if it touches a bullet.
 		if (object2 instanceof BulletComponent) {
+
 			((BulletComponent) object2).die = true;
-			
-			if(cc.powerup != null) {
+
+			if (cc.powerup != null) {
 				cc.powerup.activate();
 			}
-			
+
+			cc.killed = true;
+
 			cc.die = true;
 			PooledEffect effect = circleEffect.obtain();
 			effect.setPosition(cc.position.x, cc.position.y);
-			effect.getEmitters().get(0).getTint().setColors(new float[] {
-					cc.color.r, cc.color.g, cc.color.b
-			});
+			effect.getEmitters()
+					.get(0)
+					.getTint()
+					.setColors(
+							new float[] { cc.color.r, cc.color.g, cc.color.b });
 			effect.getEmitters().get(0).getScale().setHigh(cc.scale);
 			game.particle.addEffect(effect);
 		}

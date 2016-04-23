@@ -29,6 +29,7 @@ public class CircleComponent implements Component, GameObject {
 	public Color color;
 
 	public boolean die;
+	public boolean killed;
 	
 	public Powerup powerup;
 

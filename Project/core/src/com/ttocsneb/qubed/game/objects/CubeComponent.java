@@ -31,6 +31,7 @@ public class CubeComponent implements Component, GameObject {
 	public Color color;
 
 	public boolean die;
+	public boolean killed;
 
 	public HealthPowerup powerup;
 

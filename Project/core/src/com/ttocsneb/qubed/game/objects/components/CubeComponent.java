@@ -35,6 +35,8 @@ public class CubeComponent implements Component, GameObject {
 
 	public HealthPowerup powerup;
 
+	public boolean killed;
+
 	public CubeComponent() {
 		position = new Vector2();
 	}

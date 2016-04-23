@@ -33,6 +33,8 @@ public class CircleComponent implements Component, GameObject {
 	
 	public Powerup powerup;
 
+	public boolean killed;
+
 	public CircleComponent() {
 		position = new Vector2();
 	}

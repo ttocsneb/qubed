@@ -51,16 +51,21 @@ public class Global {
 
 		private static final String MUTE_ID = "mute";
 		public static boolean MUTE = false;
+		
+		private static final String HIGHSCORE_ID = "high score";
+		public static int HIGHSCORE = 0;
 
 		/**
 		 * Load the configuration.
 		 */
 		public static void load() {
 			MUTE = prefs.getBoolean(MUTE_ID, false);
+			HIGHSCORE = prefs.getInteger(HIGHSCORE_ID, 0);
 		}
 
 		public static void save() {
 			prefs.putBoolean(MUTE_ID, MUTE);
+			prefs.putInteger(HIGHSCORE_ID, HIGHSCORE);
 			prefs.flush();
 		}
 	}

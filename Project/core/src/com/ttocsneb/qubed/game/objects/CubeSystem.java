@@ -67,10 +67,14 @@ public class CubeSystem extends EntitySystem implements ContactListener {
 
 				// Dispose of the dead body.
 				if (cube.scale <= 0) {
-					//remove the powerup if it has not already activated.
-					if(cube.powerup != null && !cube.powerup.hasStarted()) {
+					// remove the powerup if it has not already activated.
+					if (cube.powerup != null && !cube.powerup.hasStarted()) {
 						cube.powerup.remove();
 					}
+
+					if (cube.killed)
+						game.addScore((int) (cube.getSize() * 100f) + 10);
+
 					game.world.destroyBody(cube.body);
 					engine.removeEntity(entity);
 					continue;
@@ -89,9 +93,9 @@ public class CubeSystem extends EntitySystem implements ContactListener {
 			game.shape.setColor(cube.color);
 
 			// Draw the Cube.
-			game.shape.rect(cube.position.x - cube.scale / 2f, cube.position.y - cube.scale / 2f,
-					cube.scale / 2f, cube.scale / 2f, cube.scale, cube.scale,
-					1, 1, cube.rotation);
+			game.shape.rect(cube.position.x - cube.scale / 2f, cube.position.y
+					- cube.scale / 2f, cube.scale / 2f, cube.scale / 2f,
+					cube.scale, cube.scale, 1, 1, cube.rotation);
 
 			// Kill the cube if it broke the barrier rule.
 			if (Math.pow(cube.position.x, 2) + Math.pow(cube.position.y, 2) >= 9f) {
@@ -129,10 +133,9 @@ public class CubeSystem extends EntitySystem implements ContactListener {
 
 		// Create the shape.
 		PolygonShape shape = new PolygonShape();
-		shape.set(new float[] {
-				-cc.scale / 2f, -cc.scale / 2f, -cc.scale / 2f, cc.scale / 2f,
-				cc.scale / 2f, -cc.scale / 2f, cc.scale / 2f, cc.scale / 2f
-		});
+		shape.set(new float[] { -cc.scale / 2f, -cc.scale / 2f, -cc.scale / 2f,
+				cc.scale / 2f, cc.scale / 2f, -cc.scale / 2f, cc.scale / 2f,
+				cc.scale / 2f });
 		fdef.shape = shape;
 
 		// Create the fixture.
@@ -196,18 +199,22 @@ public class CubeSystem extends EntitySystem implements ContactListener {
 
 		// Kill the cube if it even grazes a bullet.
 		if (object2 instanceof BulletComponent) {
+
 			((BulletComponent) object2).die = true;
+			cc.killed = true;
 			cc.die = true;
 
-			if(cc.powerup != null) {
+			if (cc.powerup != null) {
 				cc.powerup.activate();
 			}
-			
+
 			PooledEffect effect = squareEffect.obtain();
 			effect.setPosition(cc.position.x, cc.position.y);
-			effect.getEmitters().get(0).getTint().setColors(new float[] {
-					cc.color.r, cc.color.g, cc.color.b
-			});
+			effect.getEmitters()
+					.get(0)
+					.getTint()
+					.setColors(
+							new float[] { cc.color.r, cc.color.g, cc.color.b });
 			effect.getEmitters().get(0).getScale().setHigh(cc.scale);
 			game.particle.addEffect(effect);
 		}

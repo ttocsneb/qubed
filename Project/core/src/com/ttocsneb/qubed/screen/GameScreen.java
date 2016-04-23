@@ -47,9 +47,11 @@ import com.ttocsneb.qubed.util.Global;
  */
 public class GameScreen extends AbstractGameScreen implements InputProcessor {
 
-	//This is the length from one corner of the viewport to the other which is used for background rendering.
-	private static float ViewPortSize = (float)Math.sqrt(Math.pow(Global.VIEWPORT_GUI_HEIGHT, 2)*2);
-	
+	// This is the length from one corner of the viewport to the other which is
+	// used for background rendering.
+	private static float ViewPortSize = (float) Math.sqrt(Math.pow(
+			Global.VIEWPORT_GUI_HEIGHT, 2) * 2);
+
 	private Engine engine;
 
 	// Game Systems, where all of the logic lie
@@ -70,7 +72,7 @@ public class GameScreen extends AbstractGameScreen implements InputProcessor {
 	// The Renderers for the game.
 	public SpriteBatch batch;
 	public ShapeRenderer shape;
-	
+
 	private Color background;
 
 	// The Box2D world.
@@ -87,8 +89,12 @@ public class GameScreen extends AbstractGameScreen implements InputProcessor {
 	private boolean debug;
 
 	private BitmapFont font;
+	private BitmapFont smol;
 	private GlyphLayout gameOver;
 	private float gameOverProg;
+
+	private int score;
+	private GlyphLayout scoreLabel;
 
 	/**
 	 * Create a new Game Screen
@@ -116,14 +122,17 @@ public class GameScreen extends AbstractGameScreen implements InputProcessor {
 		new DirectionalLight(lights, 1024, new Color(1, 1, 1, 0.1f), -45);
 
 		background = new Color(0, 0, 0, 1);
-		
+
 		initEngine();
 
 		initCamera();
 
 		font = Assets.instance.fonts.huge;
-		gameOver = new GlyphLayout(font, "GAME OVER", Global.RED, 1080,
+		smol = Assets.instance.fonts.large;
+		gameOver = new GlyphLayout(font, "GAME OVER", new Color(Global.RED).mul(0.9f, 0.9f, 0.9f, 1), 1080,
 				Align.center, true);
+		scoreLabel = new GlyphLayout(Assets.instance.fonts.large, "0",
+				Color.WHITE, 0, Align.left, false);
 
 		// Don't allow the back button(on Android) to close the game.
 		Gdx.input.setCatchBackKey(true);
@@ -259,27 +268,35 @@ public class GameScreen extends AbstractGameScreen implements InputProcessor {
 		shape.setProjectionMatrix(cam.combined);
 		shape.begin(ShapeType.Filled);
 		// ////////////////////////////SHAPE RENDERER//////////////////////
-		
-		//Smoothly interpolate the current background color to the desired color.
-		
-		//Get the powerup colors.
+
+		// Smoothly interpolate the current background color to the desired
+		// color.
+
+		// Get the powerup colors.
 		Color tmp = powerup.getColor();
-		//Set the color step to 0.0666 (Full change in 0.25 seconds).
+		// Set the color step to 0.0666 (Full change in 0.25 seconds).
 		final float stp = 0.0666f;
-		
-		//step each color value of the background to the powerup color.
-		if(Math.abs(background.r-tmp.r) <= stp) background.r = tmp.r;
-		else background.r += background.r > tmp.r ? -stp : stp;
-		
-		if(Math.abs(background.g-tmp.g) <= stp) background.g = tmp.g;
-		else background.g += background.g > tmp.g ? -stp : stp;
-		
-		if(Math.abs(background.b-tmp.b) <= stp) background.b = tmp.b;
-		else background.b += background.b > tmp.b ? -stp : stp;
-		
-		//Set the background color, and draw it.
+
+		// step each color value of the background to the powerup color.
+		if (Math.abs(background.r - tmp.r) <= stp)
+			background.r = tmp.r;
+		else
+			background.r += background.r > tmp.r ? -stp : stp;
+
+		if (Math.abs(background.g - tmp.g) <= stp)
+			background.g = tmp.g;
+		else
+			background.g += background.g > tmp.g ? -stp : stp;
+
+		if (Math.abs(background.b - tmp.b) <= stp)
+			background.b = tmp.b;
+		else
+			background.b += background.b > tmp.b ? -stp : stp;
+
+		// Set the background color, and draw it.
 		shape.setColor(background);
-		shape.rect(-ViewPortSize/2, -ViewPortSize/2, ViewPortSize, ViewPortSize);
+		shape.rect(-ViewPortSize / 2, -ViewPortSize / 2, ViewPortSize,
+				ViewPortSize);
 
 		shape.setColor(Color.WHITE);
 		shape.circle(0, 0, 3, 100);
@@ -305,7 +322,8 @@ public class GameScreen extends AbstractGameScreen implements InputProcessor {
 		lights.updateAndRender();
 
 		// Draw the world debug, if in debug mode.
-		if (debug == true) worldRenderer.render(world, cam.combined);
+		if (debug == true)
+			worldRenderer.render(world, cam.combined);
 
 		if (died) {
 
@@ -332,11 +350,39 @@ public class GameScreen extends AbstractGameScreen implements InputProcessor {
 
 			font.draw(batch, gameOver, 0, 1920
 					- (960 + gameOver.height * 0.25f) * prog + gameOver.height);
+
+			if (score >= Global.Config.HIGHSCORE) {
+				Global.Config.HIGHSCORE = score;
+				Global.Config.save();
+				scoreLabel.setText(smol, score + "", Global.GREEN, 0,
+						Align.left, false);
+			} else {
+				scoreLabel.setText(smol, score + "", Color.WHITE, 0,
+						Align.left, false);
+			}
+
+			smol.draw(batch, scoreLabel, 540 - scoreLabel.width / 2, 1920
+					- (960 - scoreLabel.height * 2) * prog);
+
+		} else {
+			// Draw the score in the top left corner of the screen when the game
+			// is active.
+			scoreLabel.setText(smol, score + "");
+			smol.draw(batch, scoreLabel, 10, 1910);
 		}
 
 		// //////////////////////////HUD BATCH/////////////////////////////
 		batch.end();
 
+	}
+
+	/**
+	 * Add to the current score.
+	 * 
+	 * @param score
+	 */
+	public void addScore(int score) {
+		this.score += score;
 	}
 
 	/**
@@ -353,7 +399,7 @@ public class GameScreen extends AbstractGameScreen implements InputProcessor {
 						(rot - 180 < 0 ? rot + 180 : rot - 180) - 45,
 						(rot - 180 < 0 ? rot + 180 : rot - 180) + 45));
 		cubeComp.velocity = MathUtils.random(0.5f, 1);
-		cubeComp.scale = MathUtils.random(0.5f, 0.9f);
+		cubeComp.scale = MathUtils.random(0.5f, 1f);
 		cubeComp.color = selectColor();
 		// Add a health boos powerup 3/10 of the time.
 		if (MathUtils.randomBoolean(0.30f)) {

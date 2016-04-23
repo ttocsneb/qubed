@@ -18,6 +18,7 @@ import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.utils.Align;
 import com.ttocsneb.qubed.screen.transitions.ScreenTransition;
 import com.ttocsneb.qubed.screen.transitions.ScreenTransitionSlide;
 import com.ttocsneb.qubed.util.Assets;
@@ -38,6 +39,7 @@ public class MenuScreen extends AbstractGameScreen implements GestureListener {
 	// Font stuff.
 	private BitmapFont font;
 	private GlyphLayout title;
+	private GlyphLayout highscore;
 
 	// Camera
 	private OrthographicCamera cam;
@@ -77,6 +79,8 @@ public class MenuScreen extends AbstractGameScreen implements GestureListener {
 
 		// Create the Title
 		title = new GlyphLayout(font, "QUBED");
+		
+		highscore = new GlyphLayout(Assets.instance.fonts.large, Global.Config.HIGHSCORE + "", Color.BLACK, 0, Align.center, false);
 
 		// Init the Camera.
 		cam = new OrthographicCamera();
@@ -170,6 +174,7 @@ public class MenuScreen extends AbstractGameScreen implements GestureListener {
 
 		// Draw the title to the screen.
 		font.draw(batch, title, 1080 / 2 - title.width / 2, 1920 * 3 / 4f);
+		Assets.instance.fonts.large.draw(batch, highscore, 540, highscore.height + 10);
 
 		Assets.instance.fonts.med.setColor(Color.BLACK);
 
