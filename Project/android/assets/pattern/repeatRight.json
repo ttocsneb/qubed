@@ -1,0 +1,13 @@
+{
+objects: [
+	{
+		sizeMin: 0.5
+		offsetMin: -30
+		offsetMax: -30
+		angleMin: -10
+		angleMax: 10
+		repeatMin: 5
+		repeatMax: 15
+	}
+]
+}

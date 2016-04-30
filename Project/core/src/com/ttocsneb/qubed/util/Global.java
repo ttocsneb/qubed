@@ -5,6 +5,7 @@ import com.badlogic.gdx.Preferences;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.math.MathUtils;
 
 /**
  * Global variables accessible by all classes.
@@ -75,6 +76,21 @@ public class Global {
 	public static void dispose() {
 		batch.dispose();
 		shape.dispose();
+	}
+
+	public static Color selectColor() {
+		switch (MathUtils.random(3)) {
+		case 0:
+			return RED;
+		case 1:
+			return ORANGE;
+		case 2:
+			return BLUE;
+		case 3:
+			return GREEN;
+		default:
+			return new Color(Color.BLACK);
+		}
 	}
 
 }

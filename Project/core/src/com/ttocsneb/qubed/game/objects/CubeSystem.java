@@ -17,8 +17,10 @@ import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.ttocsneb.qubed.game.contact.ContactListener;
 import com.ttocsneb.qubed.game.objects.components.BulletComponent;
 import com.ttocsneb.qubed.game.objects.components.CubeComponent;
+import com.ttocsneb.qubed.game.powerups.HealthPowerup;
 import com.ttocsneb.qubed.screen.GameScreen;
 import com.ttocsneb.qubed.util.Assets;
+import com.ttocsneb.qubed.util.Global;
 
 /**
  * All logic for Cubes.
@@ -26,7 +28,7 @@ import com.ttocsneb.qubed.util.Assets;
  * @author TtocsNeb
  *
  */
-public class CubeSystem extends EntitySystem implements ContactListener {
+public class CubeSystem extends EntitySystem implements ContactListener, com.ttocsneb.qubed.game.spawn.Spawn {
 
 	private ImmutableArray<Entity> entities;
 
@@ -182,6 +184,24 @@ public class CubeSystem extends EntitySystem implements ContactListener {
 		// give it a shape.
 		updateShape(cc);
 	}
+	
+	@Override
+	public void spawn(int position, int direction, float velocity, float scale) {
+		CubeComponent cubeComp = new CubeComponent();
+		cubeComp.position.set(2.9f * MathUtils.cosDeg(position), 2.9f * MathUtils.sinDeg(position));
+		cubeComp.direction = direction;
+		cubeComp.velocity = velocity;
+		cubeComp.scale = scale;
+		cubeComp.color = Global.selectColor();
+		// Add a health boos powerup 3/10 of the time.
+		if (MathUtils.randomBoolean(0.30f)) {
+			cubeComp.powerup = new HealthPowerup(cubeComp, MathUtils.random(
+					0.5f, 2f), game.player);
+			game.powerup.addPowerup(cubeComp.powerup);
+		}
+
+		addCube(cubeComp);
+	}
 
 	@SuppressWarnings("unused")
 	private float lerp(float t, float a, float b) {
@@ -224,5 +244,6 @@ public class CubeSystem extends EntitySystem implements ContactListener {
 	public void endContact(Component object, Object object2) {
 
 	}
+
 
 }

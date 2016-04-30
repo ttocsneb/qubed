@@ -1,0 +1,15 @@
+{
+objects: [
+	{
+		sizeMin: 0.5
+		offsetMax: 360
+		speedMin: 0.75
+		speedMax: 1.1
+		angleMin: -10
+		angleMax: 10
+		repeatMax: 15
+		delayMin: 0.5
+		delayMax: 1.5
+	}
+]
+}

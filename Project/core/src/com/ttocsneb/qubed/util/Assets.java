@@ -14,6 +14,8 @@ import com.badlogic.gdx.graphics.g2d.TextureAtlas.AtlasRegion;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter;
 import com.badlogic.gdx.utils.Disposable;
+import com.badlogic.gdx.utils.Json;
+import com.ttocsneb.qubed.game.spawn.json.SpawnPattern;
 
 /**
  * Contains all of the assets for the game.
@@ -35,6 +37,7 @@ public class Assets implements Disposable, AssetErrorListener {
 	public AssetFonts fonts;
 	public AssetAtlas atlases;
 	public AssetParticles particles;
+	public AssetPatterns patterns;
 
 	private static final String[] ATLASES = {
 		"skins/uiskin.atlas"
@@ -125,6 +128,24 @@ public class Assets implements Disposable, AssetErrorListener {
 			music = am.get("music/Voice Over Under.mp3", Music.class);
 		}
 
+	}
+	
+	public class AssetPatterns {
+		public final SpawnPattern[] all;
+		
+		public final SpawnPattern random;
+		public final SpawnPattern repeatLeft;
+		public final SpawnPattern repeatRight;
+		
+		public AssetPatterns() {
+			Json json = new Json();
+			
+			all = new SpawnPattern[3];
+			
+			random = all[0] = json.fromJson(SpawnPattern.class, Gdx.files.internal("pattern/random.json"));
+			repeatLeft = all[1] = json.fromJson(SpawnPattern.class, Gdx.files.internal("pattern/repeat.json"));
+			repeatRight = all[2] = json.fromJson(SpawnPattern.class, Gdx.files.internal("pattern/repeatRight.json"));
+		}
 	}
 
 	/**
@@ -264,6 +285,7 @@ public class Assets implements Disposable, AssetErrorListener {
 		textures = new AssetTextures(atlas);
 		particles = new AssetParticles(atlas);
 		atlases = new AssetAtlas(assetManager);
+		patterns = new AssetPatterns();
 
 		fonts = new AssetFonts();
 		loaded = true;

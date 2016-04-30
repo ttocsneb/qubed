@@ -23,16 +23,17 @@ import com.badlogic.gdx.physics.box2d.Box2D;
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Align;
+import com.badlogic.gdx.utils.Json;
 import com.ttocsneb.qubed.game.contact.ContactManager;
 import com.ttocsneb.qubed.game.objects.BulletSystem;
 import com.ttocsneb.qubed.game.objects.CircleSystem;
 import com.ttocsneb.qubed.game.objects.CubeSystem;
 import com.ttocsneb.qubed.game.objects.ParticleSystem;
 import com.ttocsneb.qubed.game.objects.PlayerSystem;
-import com.ttocsneb.qubed.game.objects.components.CircleComponent;
-import com.ttocsneb.qubed.game.objects.components.CubeComponent;
-import com.ttocsneb.qubed.game.powerups.HealthPowerup;
 import com.ttocsneb.qubed.game.powerups.PowerupSystem;
+import com.ttocsneb.qubed.game.spawn.SpawnManager;
+import com.ttocsneb.qubed.game.spawn.json.SpawnObject;
+import com.ttocsneb.qubed.game.spawn.json.SpawnPattern;
 import com.ttocsneb.qubed.screen.transitions.ScreenTransition;
 import com.ttocsneb.qubed.screen.transitions.ScreenTransitionSlide;
 import com.ttocsneb.qubed.util.Assets;
@@ -96,6 +97,10 @@ public class GameScreen extends AbstractGameScreen implements InputProcessor {
 	private int score;
 	private GlyphLayout scoreLabel;
 
+	private SpawnManager spawner;
+
+	private SpawnPattern pattern;
+
 	/**
 	 * Create a new Game Screen
 	 * 
@@ -127,9 +132,14 @@ public class GameScreen extends AbstractGameScreen implements InputProcessor {
 
 		initCamera();
 
+
+		spawner = new SpawnManager(this);
+		spawner.startPattern(Assets.instance.patterns.all[MathUtils.random(Assets.instance.patterns.all.length-1)]);
+
 		font = Assets.instance.fonts.huge;
 		smol = Assets.instance.fonts.large;
-		gameOver = new GlyphLayout(font, "GAME OVER", new Color(Global.RED).mul(0.9f, 0.9f, 0.9f, 1), 1080,
+		gameOver = new GlyphLayout(font, "GAME OVER",
+				new Color(Global.RED).mul(0.9f, 0.9f, 0.9f, 1), 1080,
 				Align.center, true);
 		scoreLabel = new GlyphLayout(Assets.instance.fonts.large, "0",
 				Color.WHITE, 0, Align.left, false);
@@ -137,6 +147,35 @@ public class GameScreen extends AbstractGameScreen implements InputProcessor {
 		// Don't allow the back button(on Android) to close the game.
 		Gdx.input.setCatchBackKey(true);
 
+	}
+
+	/**
+	 * This is used to create new spawn patterns.
+	 */
+	@SuppressWarnings("unused")
+	private void Pattern() {
+		pattern = new SpawnPattern();
+
+		pattern.repeatMin = 1;
+		pattern.repeatMax = 1;
+		pattern.objects = new SpawnObject[1];
+		SpawnObject a = pattern.objects[0] = new SpawnObject();
+		a.angleMin = -10;
+		a.angleMax = 10;
+		a.delayMin = 0.5f;
+		a.delayMax = 1.5f;
+		a.sizeMin = 0.5f;
+		a.sizeMax = 1f;
+		a.speedMin = 0.75f;
+		a.speedMax = 1.1f;
+		a.repeatMin = 1;
+		a.repeatMax = 15;
+		a.offsetMin = 0;
+		a.offsetMax = 360;
+
+		Json json = new Json();
+		Gdx.files.local("random.json").writeString(json.prettyPrint(pattern),
+				false);
 	}
 
 	/**
@@ -189,23 +228,6 @@ public class GameScreen extends AbstractGameScreen implements InputProcessor {
 
 	}
 
-	/**
-	 * @return a random color.
-	 */
-	private Color selectColor() {
-		switch (MathUtils.random(3)) {
-		case 0:
-			return Global.RED;
-		case 1:
-			return Global.ORANGE;
-		case 2:
-			return Global.BLUE;
-		case 3:
-			return Global.GREEN;
-		default:
-			return new Color(Color.BLACK);
-		}
-	}
 
 	private boolean died;
 
@@ -248,12 +270,9 @@ public class GameScreen extends AbstractGameScreen implements InputProcessor {
 		player.setRotation(rotation);
 
 		// Spawn objects.
-		if (MathUtils.random(100) == MathUtils.random(100)) {
-			if (MathUtils.randomBoolean()) {
-				spawnCube();
-			} else {
-				spawnCircle();
-			}
+		spawner.update(delta, 1);
+		if (spawner.isPatternComplete()) {
+			spawner.startPattern(Assets.instance.patterns.all[MathUtils.random(Assets.instance.patterns.all.length-1)], MathUtils.random(5));
 		}
 
 		// Update the world.
@@ -383,58 +402,6 @@ public class GameScreen extends AbstractGameScreen implements InputProcessor {
 	 */
 	public void addScore(int score) {
 		this.score += score;
-	}
-
-	/**
-	 * Spawn a cube.
-	 */
-	private void spawnCube() {
-		CubeComponent cubeComp = new CubeComponent();
-		int rot = MathUtils.random(360);
-		cubeComp.position.x = 2.9f * MathUtils.cosDeg(rot);
-		cubeComp.position.y = 2.9f * MathUtils.sinDeg(rot);
-		cubeComp.direction = MathUtils.randomBoolean(.6f) ? (rot - 180 < 0 ? rot + 180
-				: rot - 180)
-				: (MathUtils.random(
-						(rot - 180 < 0 ? rot + 180 : rot - 180) - 45,
-						(rot - 180 < 0 ? rot + 180 : rot - 180) + 45));
-		cubeComp.velocity = MathUtils.random(0.5f, 1);
-		cubeComp.scale = MathUtils.random(0.5f, 1f);
-		cubeComp.color = selectColor();
-		// Add a health boos powerup 3/10 of the time.
-		if (MathUtils.randomBoolean(0.30f)) {
-			cubeComp.powerup = new HealthPowerup(cubeComp, MathUtils.random(
-					0.5f, 2f), player);
-			powerup.addPowerup(cubeComp.powerup);
-		}
-
-		cube.addCube(cubeComp);
-
-	}
-
-	/**
-	 * Spawn a Circle.
-	 */
-	private void spawnCircle() {
-		CircleComponent circComp = new CircleComponent();
-		int rot = MathUtils.random(360);
-		circComp.position.x = 2.9f * MathUtils.cosDeg(rot);
-		circComp.position.y = 2.9f * MathUtils.sinDeg(rot);
-		circComp.direction = MathUtils.randomBoolean(.6f) ? (rot - 180 < 0 ? rot + 180
-				: rot - 180)
-				: (MathUtils.random(
-						(rot - 180 < 0 ? rot + 180 : rot - 180) - 45,
-						(rot - 180 < 0 ? rot + 180 : rot - 180) + 45));
-		circComp.velocity = MathUtils.random(0.5f, 1);
-		circComp.scale = MathUtils.random(0.25f, 0.75f);
-		circComp.color = selectColor();
-		// Add a health boos powerup 3/10 of the time.
-		if (MathUtils.randomBoolean(0.30f)) {
-			circComp.powerup = new HealthPowerup(circComp, MathUtils.random(
-					0.5f, 2f), player);
-			powerup.addPowerup(circComp.powerup);
-		}
-		circle.addCircle(circComp);
 	}
 
 	@Override

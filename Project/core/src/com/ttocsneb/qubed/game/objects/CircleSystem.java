@@ -18,8 +18,11 @@ import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.ttocsneb.qubed.game.contact.ContactListener;
 import com.ttocsneb.qubed.game.objects.components.BulletComponent;
 import com.ttocsneb.qubed.game.objects.components.CircleComponent;
+import com.ttocsneb.qubed.game.powerups.HealthPowerup;
+import com.ttocsneb.qubed.game.spawn.Spawn;
 import com.ttocsneb.qubed.screen.GameScreen;
 import com.ttocsneb.qubed.util.Assets;
+import com.ttocsneb.qubed.util.Global;
 
 /**
  * All logic for Circles.
@@ -27,7 +30,7 @@ import com.ttocsneb.qubed.util.Assets;
  * @author Ben
  *
  */
-public class CircleSystem extends EntitySystem implements ContactListener {
+public class CircleSystem extends EntitySystem implements ContactListener, Spawn {
 
 	private ImmutableArray<Entity> entities;
 	private ComponentMapper<CircleComponent> cc = ComponentMapper
@@ -216,6 +219,24 @@ public class CircleSystem extends EntitySystem implements ContactListener {
 	@Override
 	public Class<?> getComponentType() {
 		return CircleComponent.class;
+	}
+
+	@Override
+	public void spawn(int position, int direction, float velocity,
+			float scale) {
+		CircleComponent circComp = new CircleComponent();
+		circComp.position.set(2.9f * MathUtils.cosDeg(position), 2.9f * MathUtils.sinDeg(position));
+		circComp.direction = direction;
+		circComp.velocity = velocity;
+		circComp.scale = scale;
+		circComp.color = Global.selectColor();
+		// Add a health boos powerup 3/10 of the time.
+		if (MathUtils.randomBoolean(0.30f)) {
+			circComp.powerup = new HealthPowerup(circComp, MathUtils.random(
+					0.5f, 2f), game.player);
+			game.powerup.addPowerup(circComp.powerup);
+		}
+		addCircle(circComp);		
 	}
 
 }
