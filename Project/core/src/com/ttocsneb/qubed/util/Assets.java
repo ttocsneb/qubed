@@ -75,6 +75,8 @@ public class Assets implements Disposable, AssetErrorListener {
 		public final AtlasRegion speakerOff;
 
 		public final AtlasRegion healthPowerup;
+		
+		public final AtlasRegion finger;
 
 		public AssetTextures(TextureAtlas atlas) {
 
@@ -82,6 +84,8 @@ public class Assets implements Disposable, AssetErrorListener {
 			speakerOff = atlas.findRegion("menu/speaker_off");
 
 			healthPowerup = atlas.findRegion("game/healthPwr");
+			
+			finger = atlas.findRegion("menu/finger");
 		}
 	}
 

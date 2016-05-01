@@ -11,7 +11,7 @@ import com.ttocsneb.qubed.Main;
 public class DesktopLauncher {
 	
 	private static final boolean pack = false, debug = false;
-	private static final String textureDir = "../../Raw";
+	private static final String textureDir = "textureRaw";
 	
 	public static void main (String[] arg) {
 		
@@ -34,9 +34,9 @@ public class DesktopLauncher {
 				
 				System.out.println("Done!");
 				
+			} else {
+				System.out.println(textureDir + " is not a directory!");
 			}
-			
-			System.out.println(textureDir + " is not a directory!");
 		} else {
 		
 			//Start the application.

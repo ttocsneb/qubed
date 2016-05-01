@@ -54,6 +54,8 @@ public class MenuScreen extends AbstractGameScreen implements GestureListener {
 	private int animProgress;
 	private boolean animDir;
 
+	private DragAnim drag;
+
 	// Camera position.
 	private float x;
 
@@ -79,8 +81,10 @@ public class MenuScreen extends AbstractGameScreen implements GestureListener {
 
 		// Create the Title
 		title = new GlyphLayout(font, "QUBED");
-		
-		highscore = new GlyphLayout(Assets.instance.fonts.large, Global.Config.HIGHSCORE + "", Color.BLACK, 0, Align.center, false);
+
+		highscore = new GlyphLayout(Assets.instance.fonts.large,
+				Global.Config.HIGHSCORE + "", Color.BLACK, 0, Align.center,
+				false);
 
 		// Init the Camera.
 		cam = new OrthographicCamera();
@@ -95,6 +99,9 @@ public class MenuScreen extends AbstractGameScreen implements GestureListener {
 		animInterp = 0;
 		animDir = true;
 
+		drag = new DragAnim();
+		tapTimer = 15;
+
 		Gdx.app.debug(
 				"MenuScreen",
 				Gdx.input.isPeripheralAvailable(Peripheral.Accelerometer) ? "This device has an accelerometer"
@@ -103,6 +110,14 @@ public class MenuScreen extends AbstractGameScreen implements GestureListener {
 
 	@Override
 	public void render(float delta) {
+		
+		tapTimer -= delta;
+		//If the screen hasn't been tapped yet, and the timer is finished, animate the finger.
+		if(tapTimer < 0 && !tapped) {
+			drag.start();
+			tapTimer = 15;
+		}
+		
 		// Clear the screen.
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT
 				| GL20.GL_DEPTH_BUFFER_BIT
@@ -163,7 +178,8 @@ public class MenuScreen extends AbstractGameScreen implements GestureListener {
 			Global.Config.MUTE = !Global.Config.MUTE;
 			if (Global.Config.MUTE)
 				Assets.instance.sounds.music.pause();
-			else Assets.instance.sounds.music.play();
+			else
+				Assets.instance.sounds.music.play();
 			Global.Config.save();
 		}
 
@@ -174,7 +190,8 @@ public class MenuScreen extends AbstractGameScreen implements GestureListener {
 
 		// Draw the title to the screen.
 		font.draw(batch, title, 1080 / 2 - title.width / 2, 1920 * 3 / 4f);
-		Assets.instance.fonts.large.draw(batch, highscore, 540, highscore.height + 10);
+		Assets.instance.fonts.large.draw(batch, highscore, 540,
+				highscore.height + 10);
 
 		Assets.instance.fonts.med.setColor(Color.BLACK);
 
@@ -185,11 +202,132 @@ public class MenuScreen extends AbstractGameScreen implements GestureListener {
 				region.getRegionX(), region.getRegionY(),
 				region.getRegionWidth(), region.getRegionHeight(), false, false);
 
+		drag.update(delta);
+
 		// ///////////////////////Batch Renderer////////////////////////////////
 		batch.end();
 
 	}
 
+	/**
+	 * Animates a finger moving across the screen.
+	 * 
+	 * @author TtocsNeb
+	 *
+	 */
+	private class DragAnim {
+
+		private TextureRegion finger;
+
+		private int step;
+		private float time;
+		private float timer;
+		private Vector2 position;
+		private float angle;
+
+		private float strtRot;
+		private float endRot;
+
+		private Vector2 strtPos;
+		private Vector2 endPos;
+
+		private float calpha;
+		private float strtAlpha;
+		private float endAlpha;
+
+		private Interpolation interp;
+
+		private boolean done;
+
+		private DragAnim() {
+			finger = Assets.instance.textures.finger;
+			position = new Vector2();
+			strtPos = new Vector2();
+			endPos = new Vector2();
+			done = true;
+		}
+
+		private void update(float delta) {
+			//Only update when the animation is active.
+			if (!done) {
+				//Find the progress/interpolation of the current step.
+				time += delta;
+				float prog = Math.min(time / timer, 1);
+				float alpha = interp.apply(prog);
+
+				//Interpolate the angle, position, and alpha.
+				angle = Global.lerp(alpha, strtRot, endRot);
+				position.set(Global.lerp(alpha, strtPos.x, endPos.x),
+						Global.lerp(alpha, strtPos.y, endPos.y));
+				calpha = Global.lerp(alpha, strtAlpha, endAlpha);
+
+				
+				//Draw the finger.
+				batch.setColor(1, 1, 1, calpha);
+				batch.draw(finger.getTexture(), position.x, position.y,
+						finger.getRegionWidth(), finger.getRegionHeight(),
+						finger.getRegionWidth() * 2,
+						finger.getRegionHeight() * 2, 1, 1, angle,
+						finger.getRegionX(), finger.getRegionY(),
+						finger.getRegionWidth(), finger.getRegionHeight(),
+						false, false);
+				batch.setColor(Color.WHITE);
+
+				//if the current step is finished move to the next one.
+				if (prog >= 1f) {
+					step++;
+					switch (step) {
+					case 1:
+						//Begin moving across the screen.
+						strtRot = endRot;
+						strtPos.set(endPos);
+						endPos.set(416, 960);
+						timer = 0.5625f;
+						time = 0;
+						interp = Interpolation.pow2In;
+						break;
+					case 2:
+						//Move to the end of the screen, and fade away.
+						strtRot = endRot;
+						endRot -= 30;
+						strtPos.set(endPos);
+						endPos.set(0, 1000);
+						timer = 0.5f;
+						time = 0;
+						interp = Interpolation.pow2Out;
+						strtAlpha = endAlpha;
+						endAlpha = 0;
+						break;
+					case 3:
+						//Stop the animation.
+						done = true;
+					}
+				}
+			}
+		}
+
+		private void start() {
+			//Step 0
+			//Move the finger down to simulate a press.
+			strtPos.set(775, 1200);
+			endPos.set(810, 960);
+			strtAlpha = 1;
+			endAlpha = 1;
+			timer = 0.25f;
+			time = 0;
+			strtRot = -70;
+			endRot = -135;
+			step = 0;
+			interp = Interpolation.sineIn;
+			done = false;
+		}
+
+	}
+
+	private boolean tapped;
+	private float tapTimer;
+	
+	
 	@Override
 	public void resize(int width, int height) {
 
@@ -221,11 +359,22 @@ public class MenuScreen extends AbstractGameScreen implements GestureListener {
 
 	@Override
 	public boolean tap(float x, float y, int count, int button) {
+		//If the screen hasn't been tapped yet, stop the timer, and animate the finger.
+		if(!tapped) {
+			tapTimer = 0;
+			tapped = true;
+		}
+		//If the timer has finished run the finger animation.
+		if(tapTimer <= 0) {
+			drag.start();
+			tapTimer = 7;
+		}
 		return false;
 	}
 
 	@Override
 	public boolean longPress(float x, float y) {
+		
 		return false;
 	}
 

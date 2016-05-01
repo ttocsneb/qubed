@@ -40,10 +40,17 @@ game/healthPwr
   index: -1
 
 textures3.png
-size: 256,128
+size: 256,256
 format: RGBA8888
 filter: Nearest,Nearest
 repeat: none
+menu/finger
+  rotate: false
+  xy: 2, 104
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: -1
 menu/speaker_off
   rotate: false
   xy: 2, 2
@@ -53,7 +60,7 @@ menu/speaker_off
   index: -1
 menu/speaker_on
   rotate: false
-  xy: 104, 2
+  xy: 132, 132
   size: 100, 100
   orig: 100, 100
   offset: 0, 0
