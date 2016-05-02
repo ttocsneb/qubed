@@ -110,24 +110,33 @@ public class MenuScreen extends AbstractGameScreen implements GestureListener {
 
 	@Override
 	public void render(float delta) {
-		
+
 		tapTimer -= delta;
-		//If the screen hasn't been tapped yet, and the timer is finished, animate the finger.
-		if(tapTimer < 0 && !tapped) {
+		// If the screen hasn't been tapped yet, and the timer is finished,
+		// animate the finger.
+		if (tapTimer < 0 && !tapped) {
 			drag.start();
 			tapTimer = 15;
 		}
-		
+
 		// Clear the screen.
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT
 				| GL20.GL_DEPTH_BUFFER_BIT
 				| (Gdx.graphics.getBufferFormat().coverageSampling ? GL20.GL_COVERAGE_BUFFER_BIT_NV
 						: 0));
+		Gdx.gl.glClearColor(0, 0, 0, 1);
+
+		// lerp the screen back to 0 when the screen is not being panned by the
+		// user.
+		if (panStart == 0) {
+			x = Global.lerp(delta * 10, x, 0);
+		} else if (panStart == 2) {
+			x = Global.lerp(delta * 10, x, 1080);
+		}
 
 		// Move the Camera.
-		cam.position.set(cam.position.lerp(
-				new Vector3(MathUtils.clamp(x + 540, 540, 1080 + 540),
-						cam.position.y, cam.position.z), delta * 10));
+		cam.position.set(MathUtils.clamp(x + 540, 540, 1080 + 540),
+				cam.position.y, cam.position.z);
 
 		// Progress the animation Interpolation
 		animInterp += (animDir ? -1 : 1) * delta;
@@ -148,7 +157,7 @@ public class MenuScreen extends AbstractGameScreen implements GestureListener {
 
 		// Draw the White Background
 		shape.setColor(Color.WHITE);
-		shape.rect(0, 0, 2160, 1920);
+		shape.rect(0, 0, 1080, 1920);
 
 		// Draw the arrow to the screen.
 		shape.setColor(Color.BLACK);
@@ -248,21 +257,20 @@ public class MenuScreen extends AbstractGameScreen implements GestureListener {
 		}
 
 		private void update(float delta) {
-			//Only update when the animation is active.
+			// Only update when the animation is active.
 			if (!done) {
-				//Find the progress/interpolation of the current step.
+				// Find the progress/interpolation of the current step.
 				time += delta;
 				float prog = Math.min(time / timer, 1);
 				float alpha = interp.apply(prog);
 
-				//Interpolate the angle, position, and alpha.
+				// Interpolate the angle, position, and alpha.
 				angle = Global.lerp(alpha, strtRot, endRot);
 				position.set(Global.lerp(alpha, strtPos.x, endPos.x),
 						Global.lerp(alpha, strtPos.y, endPos.y));
 				calpha = Global.lerp(alpha, strtAlpha, endAlpha);
 
-				
-				//Draw the finger.
+				// Draw the finger.
 				batch.setColor(1, 1, 1, calpha);
 				batch.draw(finger.getTexture(), position.x, position.y,
 						finger.getRegionWidth(), finger.getRegionHeight(),
@@ -273,12 +281,12 @@ public class MenuScreen extends AbstractGameScreen implements GestureListener {
 						false, false);
 				batch.setColor(Color.WHITE);
 
-				//if the current step is finished move to the next one.
+				// if the current step is finished move to the next one.
 				if (prog >= 1f) {
 					step++;
 					switch (step) {
 					case 1:
-						//Begin moving across the screen.
+						// Begin moving across the screen.
 						strtRot = endRot;
 						strtPos.set(endPos);
 						endPos.set(416, 960);
@@ -287,7 +295,7 @@ public class MenuScreen extends AbstractGameScreen implements GestureListener {
 						interp = Interpolation.pow2In;
 						break;
 					case 2:
-						//Move to the end of the screen, and fade away.
+						// Move to the end of the screen, and fade away.
 						strtRot = endRot;
 						endRot -= 30;
 						strtPos.set(endPos);
@@ -299,7 +307,7 @@ public class MenuScreen extends AbstractGameScreen implements GestureListener {
 						endAlpha = 0;
 						break;
 					case 3:
-						//Stop the animation.
+						// Stop the animation.
 						done = true;
 					}
 				}
@@ -307,8 +315,8 @@ public class MenuScreen extends AbstractGameScreen implements GestureListener {
 		}
 
 		private void start() {
-			//Step 0
-			//Move the finger down to simulate a press.
+			// Step 0
+			// Move the finger down to simulate a press.
 			strtPos.set(775, 1200);
 			endPos.set(810, 960);
 			strtAlpha = 1;
@@ -326,8 +334,7 @@ public class MenuScreen extends AbstractGameScreen implements GestureListener {
 
 	private boolean tapped;
 	private float tapTimer;
-	
-	
+
 	@Override
 	public void resize(int width, int height) {
 
@@ -359,13 +366,14 @@ public class MenuScreen extends AbstractGameScreen implements GestureListener {
 
 	@Override
 	public boolean tap(float x, float y, int count, int button) {
-		//If the screen hasn't been tapped yet, stop the timer, and animate the finger.
-		if(!tapped) {
+		// If the screen hasn't been tapped yet, stop the timer, and animate the
+		// finger.
+		if (!tapped) {
 			tapTimer = 0;
 			tapped = true;
 		}
-		//If the timer has finished run the finger animation.
-		if(tapTimer <= 0) {
+		// If the timer has finished run the finger animation.
+		if (tapTimer <= 0) {
 			drag.start();
 			tapTimer = 7;
 		}
@@ -374,7 +382,7 @@ public class MenuScreen extends AbstractGameScreen implements GestureListener {
 
 	@Override
 	public boolean longPress(float x, float y) {
-		
+
 		return false;
 	}
 
@@ -383,35 +391,44 @@ public class MenuScreen extends AbstractGameScreen implements GestureListener {
 		return false;
 	}
 
+	int panStart;
+
+	float panPos;
+
+	boolean canPlay;
+
 	@Override
 	public boolean pan(float x, float y, float deltaX, float deltaY) {
 
-		// scale the screen position to game resolution (1080x1920)
-		Vector3 v3 = cam.unproject(new Vector3(deltaX, deltaY, 0));
-		Vector2 v2 = new Vector2(v3.x, v3.y);
-
-		// Add the delta to the screen's position.
-		this.x -= v2.x;
-
-		// if the screen has moved enough, start the game.
-		if (this.x > 135) {
-			this.x = 1080;
-			ScreenTransition transition = ScreenTransitionSlide.init(0.125f,
-					ScreenTransitionSlide.LEFT, true, Interpolation.pow2);
-			game.setScreen(new GameScreen(game), transition);
+		// Set the pan position when the pan begins.
+		if (panStart != 1) {
+			panPos = x / (Gdx.graphics.getWidth() / 1080f);
+			panStart = 1;
 		}
+
+		// Set can play to true if the pan speed is fast enough, or the screen
+		// is more than half way across.
+		canPlay = (-x / (Gdx.graphics.getWidth() / 1080f)) + panPos > 540
+				|| (deltaX / (Gdx.graphics.getWidth() / 1080f))
+						/ Gdx.graphics.getDeltaTime() < -350;
+
+		// Set the x position of the screen.
+		this.x = -x / (Gdx.graphics.getWidth() / 1080f) + panPos;
 
 		return false;
 	}
 
 	@Override
 	public boolean panStop(float x, float y, int pointer, int button) {
+		// reset the pan Start
+		panStart = 0;
 
-		// Reset the pan.. I think.
-		if (this.x >= 1080) {
-			this.x = 1080;
-		} else {
-			this.x = 0;
+		// if can play is true, start the game.
+		if (canPlay) {
+			panStart = 2;
+			ScreenTransition transition = ScreenTransitionSlide.init(0.125f,
+					ScreenTransitionSlide.LEFT, true, Interpolation.pow2);
+			game.setScreen(new GameScreen(game), transition);
 		}
 
 		return false;
