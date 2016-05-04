@@ -39,8 +39,8 @@ public class PlayerSystem extends EntitySystem implements ContactListener {
 
 	private ParticleEffectPool triangleEffect;
 
-	private static final float COOLDOWN = 0.5f;
-	private static final float DELAY = 0.5f;
+	private static final float COOLDOWN = 0.33f;
+	private static final float DELAY = 0.33f;
 	private static final float BULLETSIZE = 0.1f;
 
 	private float direction; // Wanted rotation
@@ -77,6 +77,8 @@ public class PlayerSystem extends EntitySystem implements ContactListener {
 		e = new Vector2();
 
 		initBody(gs.world);
+		
+		difficulty = 1;
 	}
 
 	/**
@@ -173,6 +175,12 @@ public class PlayerSystem extends EntitySystem implements ContactListener {
 				+ ((b.y - a.y) * percent));
 
 	}
+	
+	private float difficulty;
+	
+	public void setDifficulty(float diff) {
+		difficulty = diff;
+	}
 
 	@Override
 	public void update(float delta) {
@@ -203,10 +211,10 @@ public class PlayerSystem extends EntitySystem implements ContactListener {
 		// ///////////////////////////////////////////////////////////
 
 		// Shoot
-		if (size > 0.1 && coolDown <= 0 && Gdx.input.isTouched() && !touched) {
+		if (size > 0.1 && coolDown/difficulty <= 0 && Gdx.input.isTouched() && !touched) {
 			touched = true;
-			coolDown = COOLDOWN;
-			delay = DELAY;
+			coolDown = COOLDOWN/difficulty;
+			delay = DELAY/difficulty;
 			BulletComponent c = new BulletComponent();
 			c.position.x = a.x;
 			c.position.y = a.y;
@@ -313,7 +321,7 @@ public class PlayerSystem extends EntitySystem implements ContactListener {
 					// Calculate the progress of the transition, and interpolate
 					// it
 					// to make it smooth.
-					progress = 1 - coolDown / COOLDOWN;
+					progress = 1 - coolDown / COOLDOWN/difficulty;
 					progress = Interpolation.pow2Out.apply(progress);
 					progress *= BULLETSIZE;
 

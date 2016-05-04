@@ -100,7 +100,9 @@ public class GameScreen extends AbstractGameScreen implements InputProcessor {
 	private SpawnManager spawner;
 
 	private SpawnPattern pattern;
-
+	
+	private float difficulty;
+	
 	/**
 	 * Create a new Game Screen
 	 * 
@@ -144,6 +146,8 @@ public class GameScreen extends AbstractGameScreen implements InputProcessor {
 		scoreLabel = new GlyphLayout(Assets.instance.fonts.large, "0",
 				Color.WHITE, 0, Align.left, false);
 
+		difficulty = 1;
+		
 		// Don't allow the back button(on Android) to close the game.
 		Gdx.input.setCatchBackKey(true);
 
@@ -233,6 +237,7 @@ public class GameScreen extends AbstractGameScreen implements InputProcessor {
 
 	@Override
 	public void render(float delta) {
+		
 
 		// Clear the screen.
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT
@@ -270,9 +275,10 @@ public class GameScreen extends AbstractGameScreen implements InputProcessor {
 		player.setRotation(rotation);
 
 		// Spawn objects.
-		spawner.update(delta, 1);
+		spawner.update(delta, difficulty);
 		if (spawner.isPatternComplete()) {
 			spawner.startPattern(Assets.instance.patterns.all[MathUtils.random(Assets.instance.patterns.all.length-1)], MathUtils.random(5));
+			difficulty += 0.1f;
 		}
 
 		// Update the world.
@@ -320,6 +326,8 @@ public class GameScreen extends AbstractGameScreen implements InputProcessor {
 		shape.setColor(Color.WHITE);
 		shape.circle(0, 0, 3, 100);
 
+		player.setDifficulty(difficulty);
+		
 		engine.update(delta);
 
 		// ////////////////////////////SHAPE RENDERER//////////////////////
