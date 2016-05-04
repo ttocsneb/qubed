@@ -133,6 +133,8 @@ public class GameScreen extends AbstractGameScreen implements InputProcessor {
 		initEngine();
 
 		initCamera();
+		
+		//Pattern();
 
 
 		spawner = new SpawnManager(this);
@@ -164,21 +166,24 @@ public class GameScreen extends AbstractGameScreen implements InputProcessor {
 		pattern.repeatMax = 1;
 		pattern.objects = new SpawnObject[1];
 		SpawnObject a = pattern.objects[0] = new SpawnObject();
-		a.angleMin = -10;
-		a.angleMax = 10;
-		a.delayMin = 0.5f;
 		a.delayMax = 1.5f;
+		a.delayMin = 1;
+		a.offsetDiff = true;
+		a.offsetDiffScale = 1.1f;
+		a.offsetMax = (int) (170/a.offsetDiffScale);
+		a.offsetMin = (int) (150/a.offsetDiffScale);
+		a.repeatMin = 3;
+		a.repeatMax = 6;
+		a.sizeDiff = false;
+		a.sizeMax = .75f;
 		a.sizeMin = 0.5f;
-		a.sizeMax = 1f;
-		a.speedMin = 0.75f;
-		a.speedMax = 1.1f;
-		a.repeatMin = 1;
-		a.repeatMax = 15;
-		a.offsetMin = 0;
-		a.offsetMax = 360;
-
+		a.speedDiff = true;
+		a.speedDiffScale = 0.1f;
+		a.speedMin = 0.5f/a.speedDiffScale;
+		a.speedMax = 1f/a.speedDiffScale;
+		
 		Json json = new Json();
-		Gdx.files.local("random.json").writeString(json.prettyPrint(pattern),
+		Gdx.files.local("../android/assets/pattern/oppositeOther.json").writeString(json.prettyPrint(pattern),
 				false);
 	}
 
@@ -278,7 +283,7 @@ public class GameScreen extends AbstractGameScreen implements InputProcessor {
 		spawner.update(delta, difficulty);
 		if (spawner.isPatternComplete()) {
 			spawner.startPattern(Assets.instance.patterns.all[MathUtils.random(Assets.instance.patterns.all.length-1)], MathUtils.random(5));
-			difficulty += 0.1f;
+			difficulty += 0.25f;
 		}
 
 		// Update the world.

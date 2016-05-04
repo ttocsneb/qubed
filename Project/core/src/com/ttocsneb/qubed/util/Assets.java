@@ -137,18 +137,20 @@ public class Assets implements Disposable, AssetErrorListener {
 	public class AssetPatterns {
 		public final SpawnPattern[] all;
 		
-		public final SpawnPattern random;
+		public final SpawnPattern opposite;
+		public final SpawnPattern oppositeThing;
 		public final SpawnPattern repeatLeft;
 		public final SpawnPattern repeatRight;
 		
 		public AssetPatterns() {
 			Json json = new Json();
 			
-			all = new SpawnPattern[3];
+			all = new SpawnPattern[4];
 			
-			random = all[0] = json.fromJson(SpawnPattern.class, Gdx.files.internal("pattern/random.json"));
+			opposite = all[0] = json.fromJson(SpawnPattern.class, Gdx.files.internal("pattern/opposite.json"));
 			repeatLeft = all[1] = json.fromJson(SpawnPattern.class, Gdx.files.internal("pattern/repeat.json"));
 			repeatRight = all[2] = json.fromJson(SpawnPattern.class, Gdx.files.internal("pattern/repeatRight.json"));
+			oppositeThing = all[3] = json.fromJson(SpawnPattern.class, Gdx.files.internal("pattern/oppositeOther.json"));
 		}
 	}
 

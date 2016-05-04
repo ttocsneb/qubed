@@ -39,8 +39,8 @@ public class PlayerSystem extends EntitySystem implements ContactListener {
 
 	private ParticleEffectPool triangleEffect;
 
-	private static final float COOLDOWN = 0.33f;
-	private static final float DELAY = 0.33f;
+	private static final float COOLDOWN = 0.5f;
+	private static final float DELAY = 0.5f;
 	private static final float BULLETSIZE = 0.1f;
 
 	private float direction; // Wanted rotation

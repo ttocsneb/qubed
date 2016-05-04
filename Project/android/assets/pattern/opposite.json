@@ -2,9 +2,10 @@
 objects: [
 	{
 		sizeMin: 0.5
+		sizeMax: 0.75
 		sizeDiff: false
-		offsetMin: 22
-		offsetMax: 27
+		offsetMin: 172
+		offsetMax: 190
 		offsetDiff: true
 		offsetDiffScale: 1.1
 		speedMin: 5

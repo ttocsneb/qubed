@@ -3,6 +3,7 @@ package com.ttocsneb.qubed.game.spawn;
 import java.util.HashMap;
 
 import com.badlogic.gdx.math.MathUtils;
+import com.ttocsneb.qubed.game.spawn.json.SpawnObject;
 import com.ttocsneb.qubed.game.spawn.json.SpawnPattern;
 import com.ttocsneb.qubed.screen.GameScreen;
 
@@ -42,45 +43,46 @@ public class SpawnManager {
 	 * 
 	 * @param delta
 	 */
-	public void update(float delta, float speed) {
+	public void update(float delta, float difficulty) {
 		// Update the time left before spawning an object.
-		delay -= delta * speed;
+		delay -= delta;
 
 		// Spawn an object if the sequence is not done, and the delay is
 		// finished.
 		if (active != null && done == false && delay < 0) {
+			SpawnObject obj = active.objects[step];
 
 			// Adjust the position the object will spawn at.
-			position += MathUtils.random(active.objects[step].offsetMin,
-					active.objects[step].offsetMax);
+			position += MathUtils.random(obj.offsetMin * (obj.offsetDiff ? difficulty*obj.offsetDiffScale : 1),
+					obj.offsetMax  * (obj.offsetDiff ? difficulty*obj.offsetDiffScale : 1));
 
-			if (!objects.containsKey(active.objects[step].object)) {
+			if (!objects.containsKey(obj.object)) {
 				// If there is no object type set, spawn a random type.
 				((Spawn) objects.values().toArray()[MathUtils.random(objects
 						.size() - 1)]).spawn(
 						position,
-						position
+						(int) (position
 								+ 180
 								- MathUtils.random(
-										active.objects[step].angleMin,
-										active.objects[step].angleMax),
-						MathUtils.random(active.objects[step].speedMin,
-								active.objects[step].speedMax), MathUtils
-								.random(active.objects[step].sizeMin,
-										active.objects[step].sizeMax));
+										obj.angleMin / (obj.angleDiff ? difficulty*obj.angleDiffScale : 1),
+										obj.angleMax / (obj.angleDiff ? difficulty*obj.angleDiffScale : 1))),
+						MathUtils.random(obj.speedMin * (obj.speedDiff ? difficulty*obj.speedDiffScale : 1),
+								obj.speedMax * (obj.speedDiff ? difficulty*obj.speedDiffScale : 1)), MathUtils
+								.random(obj.sizeMin * (obj.sizeDiff ? difficulty*obj.sizeDiffScale : 1),
+										obj.sizeMax * (obj.sizeDiff ? difficulty*obj.sizeDiffScale : 1)));
 			} else {
 				// Spawn the object.
-				objects.get(active.objects[step].object).spawn(
+				objects.get(obj.object).spawn(
 						position,
-						position
+						(int) (position
 								+ 180
 								- MathUtils.random(
-										active.objects[step].angleMin,
-										active.objects[step].angleMax),
-						MathUtils.random(active.objects[step].speedMin,
-								active.objects[step].speedMax),
-						MathUtils.random(active.objects[step].sizeMin,
-								active.objects[step].sizeMax));
+										obj.angleMin / (obj.angleDiff ? difficulty*obj.angleDiffScale : 1),
+										obj.angleMax / (obj.angleDiff ? difficulty*obj.angleDiffScale : 1))),
+						MathUtils.random(obj.speedMin * (obj.speedDiff ? difficulty*obj.speedDiffScale : 1),
+								obj.speedMax * (obj.speedDiff ? difficulty*obj.speedDiffScale : 1)),
+						MathUtils.random(obj.sizeMin * (obj.sizeDiff ? difficulty*obj.sizeDiffScale : 1),
+								obj.sizeMax * (obj.sizeDiff ? difficulty*obj.sizeDiffScale : 1)));
 			}
 
 			// add to subStep each time an object has spawned.
@@ -129,8 +131,7 @@ public class SpawnManager {
 		subStep = 0;
 		repeatStep = 0;
 
-		position = MathUtils.random(pattern.startAngleMin,
-				pattern.startAngleMax);
+		position = MathUtils.random(0, 360);
 		this.delay = delay;
 		subRepeat = MathUtils.random(pattern.objects[0].repeatMin,
 				pattern.objects[0].repeatMax);

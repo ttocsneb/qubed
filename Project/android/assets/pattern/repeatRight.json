@@ -2,12 +2,18 @@
 objects: [
 	{
 		sizeMin: 0.5
-		offsetMin: -30
-		offsetMax: -30
-		angleMin: -10
-		angleMax: 10
-		repeatMin: 5
-		repeatMax: 15
+		sizeDiff: false
+		offsetMin: -22
+		offsetMax: -27
+		offsetDiff: true
+		offsetDiffScale: 1.1
+		speedMin: 5
+		speedMax: 10
+		speedDiff: true
+		speedDiffScale: 0.1
+		repeatMin: 3
+		repeatMax: 6
+		delayMax: 1.5
 	}
 ]
 }
