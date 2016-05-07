@@ -30,14 +30,14 @@ public class PowerupSystem extends EntitySystem {
 	 */
 	public Color getColor() {
 		//Start out with a white color
-		Color c = new Color(1, 1, 1, 1);
+		Color c = new Color(0, 0, 0, 1);
 		boolean active = false;
 		
 		//Go through each powerup and check if it is active.
 		for(Powerup p : objects) {
 			if(p.isActive()) {
 				//If it is multiply the current color by the powerup's color.
-				c = c.mul(p.getColor());
+				c = c.add(p.getColor());
 				active = true;
 			}
 		}

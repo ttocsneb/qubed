@@ -22,7 +22,7 @@ public class SlowPowerup extends Powerup {
 	public SlowPowerup(GameObject object, float amplitude, float time,
 			GameScreen gamescreen) {
 		super(object, Assets.instance.textures.slowPowerup, time*amplitude);
-		this.time = time;
+		this.time = time*amplitude;
 		gameScreen = gamescreen;
 		this.amplitude = amplitude;
 
@@ -47,13 +47,13 @@ public class SlowPowerup extends Powerup {
 		} else if (time <= lerpTime) {
 			alphaTime += delta;
 			float alpha = Interpolation.sine.apply(Math.min(1, alphaTime/lerpTime));
-			gameScreen.speed = Global.lerp(alpha, amplitude, start);
+			gameScreen.speed = Global.lerp(alpha, amplitude, 1);
 		}
 	}
 
 	@Override
 	public void end() {
-		gameScreen.speed = start;
+		gameScreen.speed = 1;
 	}
 
 	@Override

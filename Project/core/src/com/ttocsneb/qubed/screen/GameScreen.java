@@ -260,14 +260,18 @@ public class GameScreen extends AbstractGameScreen implements InputProcessor {
 						: 0));
 
 		if (Gdx.app.getType() != ApplicationType.Desktop) {
-			// Rotate the screen using buttons if on desktop.
-			orientation = Math.max(Math.min(Gdx.input.getAccelerometerX()*rotationSpeed, 5),
-					-5);
-		} else {
 			// Rotate the screen using the accelerometer.
-			orientation = Global.lerp((delta * 2) * rotationSpeed, orientation, MathUtils.clamp(
-					(Gdx.input.isKeyPressed(Keys.A) ? 5 : Gdx.input
-							.isKeyPressed(Keys.D) ? -5 : -orientation), -5, 5));
+			// * 60 * delta while redundant allows slow motion to effect the
+			// orientation speed
+			orientation = Math.max(
+					Math.min((Gdx.input.getAccelerometerX() * 60 * delta)
+							* rotationSpeed, 5), -5);
+		} else {
+			// Rotate the screen using buttons if on desktop.
+			orientation = Global.lerp((delta * 2) * rotationSpeed, orientation,
+					MathUtils.clamp((Gdx.input.isKeyPressed(Keys.A) ? 5
+							: Gdx.input.isKeyPressed(Keys.D) ? -5
+									: -orientation), -5, 5));
 		}
 
 		if (player.died()) {
