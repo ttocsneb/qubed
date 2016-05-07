@@ -18,6 +18,7 @@ import com.ttocsneb.qubed.game.contact.ContactListener;
 import com.ttocsneb.qubed.game.objects.components.BulletComponent;
 import com.ttocsneb.qubed.game.objects.components.CubeComponent;
 import com.ttocsneb.qubed.game.powerups.HealthPowerup;
+import com.ttocsneb.qubed.game.powerups.SlowPowerup;
 import com.ttocsneb.qubed.screen.GameScreen;
 import com.ttocsneb.qubed.util.Assets;
 import com.ttocsneb.qubed.util.Global;
@@ -197,6 +198,10 @@ public class CubeSystem extends EntitySystem implements ContactListener, com.tto
 		if (MathUtils.randomBoolean(0.30f)) {
 			cubeComp.powerup = new HealthPowerup(cubeComp, MathUtils.random(
 					0.5f, 2f), game.player);
+			game.powerup.addPowerup(cubeComp.powerup);
+		} else if(MathUtils.randomBoolean(0.143f)) {
+			//The actual probability is 10% because (1-30%) * (14.3%) = 10%
+			cubeComp.powerup = new SlowPowerup(cubeComp, Math.min(0.9f, (MathUtils.random(0.25f, 0.9f)/cubeComp.scale)), MathUtils.random(1f, 7f), game);
 			game.powerup.addPowerup(cubeComp.powerup);
 		}
 

@@ -19,6 +19,7 @@ import com.ttocsneb.qubed.game.contact.ContactListener;
 import com.ttocsneb.qubed.game.objects.components.BulletComponent;
 import com.ttocsneb.qubed.game.objects.components.CircleComponent;
 import com.ttocsneb.qubed.game.powerups.HealthPowerup;
+import com.ttocsneb.qubed.game.powerups.SlowPowerup;
 import com.ttocsneb.qubed.game.spawn.Spawn;
 import com.ttocsneb.qubed.screen.GameScreen;
 import com.ttocsneb.qubed.util.Assets;
@@ -234,6 +235,10 @@ public class CircleSystem extends EntitySystem implements ContactListener, Spawn
 		if (MathUtils.randomBoolean(0.30f)) {
 			circComp.powerup = new HealthPowerup(circComp, MathUtils.random(
 					0.5f, 2f), game.player);
+			game.powerup.addPowerup(circComp.powerup);
+		} else if(MathUtils.randomBoolean(0.143f)) {
+			//The actual probability is 10% because (1-30%) * (14.3%) = 10%
+			circComp.powerup = new SlowPowerup(circComp, Math.min(0.9f, (MathUtils.random(0.25f, 0.9f)/circComp.scale)), MathUtils.random(1f, 7f), game);
 			game.powerup.addPowerup(circComp.powerup);
 		}
 		addCircle(circComp);		

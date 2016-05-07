@@ -105,6 +105,11 @@ public class GameScreen extends AbstractGameScreen implements InputProcessor {
 
 	private float difficulty;
 
+	// //////// PowerUp Variables ////////////
+
+	public float speed;
+	public float rotationSpeed;
+
 	/**
 	 * Create a new Game Screen
 	 * 
@@ -116,6 +121,9 @@ public class GameScreen extends AbstractGameScreen implements InputProcessor {
 
 	@Override
 	public void show() {
+		speed = 1f;
+		rotationSpeed = 1f;
+
 		died = false;
 
 		// Initialize Box2D.
@@ -243,6 +251,7 @@ public class GameScreen extends AbstractGameScreen implements InputProcessor {
 
 	@Override
 	public void render(float delta) {
+		delta = delta * speed;
 
 		// Clear the screen.
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT
@@ -252,11 +261,11 @@ public class GameScreen extends AbstractGameScreen implements InputProcessor {
 
 		if (Gdx.app.getType() != ApplicationType.Desktop) {
 			// Rotate the screen using buttons if on desktop.
-			orientation = Math.max(Math.min(Gdx.input.getAccelerometerX(), 5),
+			orientation = Math.max(Math.min(Gdx.input.getAccelerometerX()*rotationSpeed, 5),
 					-5);
 		} else {
 			// Rotate the screen using the accelerometer.
-			orientation = Global.lerp(delta * 2, orientation, MathUtils.clamp(
+			orientation = Global.lerp((delta * 2) * rotationSpeed, orientation, MathUtils.clamp(
 					(Gdx.input.isKeyPressed(Keys.A) ? 5 : Gdx.input
 							.isKeyPressed(Keys.D) ? -5 : -orientation), -5, 5));
 		}

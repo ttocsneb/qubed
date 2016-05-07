@@ -6,7 +6,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.Fixture;
 import com.ttocsneb.qubed.game.objects.GameObject;
-import com.ttocsneb.qubed.game.powerups.HealthPowerup;
+import com.ttocsneb.qubed.game.powerups.Powerup;
 
 /**
  * Component for Cubes.
@@ -33,7 +33,7 @@ public class CubeComponent implements Component, GameObject {
 
 	public boolean die;
 
-	public HealthPowerup powerup;
+	public Powerup powerup;
 
 	public boolean killed;
 
