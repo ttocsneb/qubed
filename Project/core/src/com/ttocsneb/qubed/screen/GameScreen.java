@@ -95,14 +95,16 @@ public class GameScreen extends AbstractGameScreen implements InputProcessor {
 	private float gameOverProg;
 
 	private int score;
+	private boolean swithc;
+	private int scoreDisplay;
 	private GlyphLayout scoreLabel;
 
 	private SpawnManager spawner;
 
 	private SpawnPattern pattern;
-	
+
 	private float difficulty;
-	
+
 	/**
 	 * Create a new Game Screen
 	 * 
@@ -133,12 +135,12 @@ public class GameScreen extends AbstractGameScreen implements InputProcessor {
 		initEngine();
 
 		initCamera();
-		
-		//Pattern();
 
+		// Pattern();
 
 		spawner = new SpawnManager(this);
-		spawner.startPattern(Assets.instance.patterns.all[MathUtils.random(Assets.instance.patterns.all.length-1)]);
+		spawner.startPattern(Assets.instance.patterns.all[MathUtils
+				.random(Assets.instance.patterns.all.length - 1)]);
 
 		font = Assets.instance.fonts.huge;
 		smol = Assets.instance.fonts.large;
@@ -149,7 +151,7 @@ public class GameScreen extends AbstractGameScreen implements InputProcessor {
 				Color.WHITE, 0, Align.left, false);
 
 		difficulty = 1;
-		
+
 		// Don't allow the back button(on Android) to close the game.
 		Gdx.input.setCatchBackKey(true);
 
@@ -170,8 +172,8 @@ public class GameScreen extends AbstractGameScreen implements InputProcessor {
 		a.delayMin = 1;
 		a.offsetDiff = true;
 		a.offsetDiffScale = 1.1f;
-		a.offsetMax = (int) (170/a.offsetDiffScale);
-		a.offsetMin = (int) (150/a.offsetDiffScale);
+		a.offsetMax = (int) (170 / a.offsetDiffScale);
+		a.offsetMin = (int) (150 / a.offsetDiffScale);
 		a.repeatMin = 3;
 		a.repeatMax = 6;
 		a.sizeDiff = false;
@@ -179,12 +181,12 @@ public class GameScreen extends AbstractGameScreen implements InputProcessor {
 		a.sizeMin = 0.5f;
 		a.speedDiff = true;
 		a.speedDiffScale = 0.1f;
-		a.speedMin = 0.5f/a.speedDiffScale;
-		a.speedMax = 1f/a.speedDiffScale;
-		
+		a.speedMin = 0.5f / a.speedDiffScale;
+		a.speedMax = 1f / a.speedDiffScale;
+
 		Json json = new Json();
-		Gdx.files.local("../android/assets/pattern/oppositeOther.json").writeString(json.prettyPrint(pattern),
-				false);
+		Gdx.files.local("../android/assets/pattern/oppositeOther.json")
+				.writeString(json.prettyPrint(pattern), false);
 	}
 
 	/**
@@ -237,12 +239,10 @@ public class GameScreen extends AbstractGameScreen implements InputProcessor {
 
 	}
 
-
 	private boolean died;
 
 	@Override
 	public void render(float delta) {
-		
 
 		// Clear the screen.
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT
@@ -282,7 +282,9 @@ public class GameScreen extends AbstractGameScreen implements InputProcessor {
 		// Spawn objects.
 		spawner.update(delta, difficulty);
 		if (spawner.isPatternComplete()) {
-			spawner.startPattern(Assets.instance.patterns.all[MathUtils.random(Assets.instance.patterns.all.length-1)], MathUtils.random(5));
+			spawner.startPattern(Assets.instance.patterns.all[MathUtils
+					.random(Assets.instance.patterns.all.length - 1)],
+					MathUtils.random(5));
 			difficulty += 0.25f;
 		}
 
@@ -332,7 +334,7 @@ public class GameScreen extends AbstractGameScreen implements InputProcessor {
 		shape.circle(0, 0, 3, 100);
 
 		player.setDifficulty(difficulty);
-		
+
 		engine.update(delta);
 
 		// ////////////////////////////SHAPE RENDERER//////////////////////
@@ -399,7 +401,11 @@ public class GameScreen extends AbstractGameScreen implements InputProcessor {
 		} else {
 			// Draw the score in the top left corner of the screen when the game
 			// is active.
-			scoreLabel.setText(smol, score + "");
+			if (swithc)
+				scoreDisplay += scoreDisplay - score > 0 ? -1 : scoreDisplay
+						- score < 0 ? 1 : 0;
+			swithc = !swithc;
+			scoreLabel.setText(smol, scoreDisplay + "");
 			smol.draw(batch, scoreLabel, 10, 1910);
 		}
 
