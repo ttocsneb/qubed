@@ -19,6 +19,7 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.physics.box2d.Box2D;
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
 import com.badlogic.gdx.physics.box2d.World;
@@ -427,6 +428,11 @@ public class GameScreen extends AbstractGameScreen implements InputProcessor {
 
 	}
 
+	public Vector2 getPointer() {
+		Vector3 v3 = cam.unproject(new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0));
+		return new Vector2(v3.x, v3.y);
+	}
+	
 	/**
 	 * Add to the current score.
 	 * 

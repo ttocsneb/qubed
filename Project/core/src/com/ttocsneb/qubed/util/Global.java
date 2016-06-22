@@ -17,7 +17,7 @@ public class Global {
 
 	public static final float VIEWPORT_WIDTH = 4;
 	public static final float VIEWPORT_GUI_HEIGHT = 7.111111f;
-
+	
 	public static final String TEXTURE_ATLAS = "textures/textures.atlas";
 
 	public static final SpriteBatch batch = new SpriteBatch();

@@ -34,8 +34,7 @@ import com.ttocsneb.qubed.util.Assets;
  */
 public class PlayerSystem extends EntitySystem implements ContactListener {
 
-	// WARNING: I have not updated the comments for this class, enter at your
-	// own risk!
+	// TODO allow the player to shoot from any corner.
 
 	private ParticleEffectPool triangleEffect;
 
@@ -43,22 +42,26 @@ public class PlayerSystem extends EntitySystem implements ContactListener {
 	private static final float DELAY = 0.5f;
 	private static final float BULLETSIZE = 0.1f;
 
-	private float direction; // Wanted rotation
-	private float rotation; // Current rotation
-
-	private float size;
-	private float health;
-
 	private GameScreen game;
 
+	/** The Wanted rotation */
+	private float torotation; // Wanted rotation
+	/** The current rotation */
+	private float rotation; // Current rotation
+	/** The size of the player */
+	private float size;
+	/** TODO add desc. */
+	private float health;
+	/** TODO add desc. */
 	private float coolDown = 0;
-
+	/** TODO add desc. */
 	private float delay = DELAY;
-
+	/** Used for touch events. */
 	private boolean touched = true;
+	/** which orientation the shoot animation should be in degrees */
+	private int orient = 0;
 
 	private Vector2 a, b, c, d, e;
-
 	private Body body;
 	private Fixture fixture;
 
@@ -70,6 +73,7 @@ public class PlayerSystem extends EntitySystem implements ContactListener {
 		triangleEffect = new ParticleEffectPool(
 				Assets.instance.particles.triangleExp, 1, 5);
 
+		// initiate the vectors.
 		a = new Vector2();
 		b = new Vector2();
 		c = new Vector2();
@@ -77,7 +81,7 @@ public class PlayerSystem extends EntitySystem implements ContactListener {
 		e = new Vector2();
 
 		initBody(gs.world);
-		
+
 		difficulty = 1;
 	}
 
@@ -93,8 +97,8 @@ public class PlayerSystem extends EntitySystem implements ContactListener {
 		bdef.position.set(0, 0);
 		body = world.createBody(bdef);
 		body.setUserData(new PlayerComponent());
-		
-		size = 0.1f;                                              
+
+		size = 0.1f;
 
 		fixture = null;
 		updateShape();
@@ -124,7 +128,8 @@ public class PlayerSystem extends EntitySystem implements ContactListener {
 			fixture = null;
 		}
 
-		if (size < 0.001f) return;
+		if (size < 0.001f)
+			return;
 
 		FixtureDef fdef = new FixtureDef();
 
@@ -143,9 +148,7 @@ public class PlayerSystem extends EntitySystem implements ContactListener {
 
 		// Gdx.app.debug("PlayerSystem", "A: " + a + "; B: " + b + "; C: " + c);
 
-		float[] vert = new float[] {
-				a.x, a.y, b.x, b.y, c.x, c.y
-		};
+		float[] vert = new float[] { a.x, a.y, b.x, b.y, c.x, c.y };
 
 		shape.set(vert);
 
@@ -166,7 +169,7 @@ public class PlayerSystem extends EntitySystem implements ContactListener {
 	 * @return <b>true</b> if the player has died.
 	 */
 	public boolean died() {
-		return size <= 0.01f;
+		return health <= BULLETSIZE;
 	}
 
 	private Vector2 point(Vector2 a, Vector2 b, float percent) {
@@ -175,34 +178,17 @@ public class PlayerSystem extends EntitySystem implements ContactListener {
 				+ ((b.y - a.y) * percent));
 
 	}
-	
+
 	private float difficulty;
-	
+
 	public void setDifficulty(float diff) {
 		difficulty = diff;
 	}
 
 	@Override
 	public void update(float delta) {
-		/*
-		 * If possible, use real physics to translate the rotation of the
-		 * player's body. For now, we are setting the rotation directly
-		 * (breaking physics). This is a temporary fix.
-		 * 
-		 * float nextAngle = body.getAngle() + body.getAngularVelocity()*delta;
-		 * float totalRotation = (MathUtils.degreesToRadians*rotation) -
-		 * nextAngle; while(totalRotation < -180 * MathUtils.degreesToRadians)
-		 * totalRotation += 360*MathUtils.degreesToRadians; while(totalRotation
-		 * > 180 * MathUtils.degreesToRadians) totalRotation -=
-		 * 360*MathUtils.degreesToRadians; float desiredAngularVelocity =
-		 * totalRotation / delta; float impulse = body.getInertia() *
-		 * desiredAngularVelocity; body.applyAngularImpulse(impulse, true);
-		 */
 		body.setTransform(body.getPosition(), (360 - rotation)
 				* MathUtils.degreesToRadians);
-
-		// Gdx.app.debug("PlayerSystem", "Rotation: " + rotation + "; BodyRot: "
-		// + body.getAngle() * MathUtils.radiansToDegrees);
 
 		// ////////////////////////////////////////////////////////////
 		//
@@ -210,25 +196,82 @@ public class PlayerSystem extends EntitySystem implements ContactListener {
 		//
 		// ///////////////////////////////////////////////////////////
 
-		// Shoot
-		if (size > 0.1 && coolDown/difficulty <= 0 && Gdx.input.isTouched() && !touched) {
+		
+		// Shoot if the player has tapped the screen.
+		if (size > BULLETSIZE && coolDown / difficulty <= 0
+				&& Gdx.input.isTouched() && !touched) {
+
+			
 			touched = true;
-			coolDown = COOLDOWN/difficulty;
-			delay = DELAY/difficulty;
+			coolDown = COOLDOWN / difficulty;
+			delay = DELAY / difficulty;
 			BulletComponent c = new BulletComponent();
-			c.position.x = a.x;
-			c.position.y = a.y;
 
-			c.rotation = rotation;
+			//decide which point to shoot from.
+			if (inTriange(game.getPointer(), new Vector2(0, 0),
+					new Vector2(2203 * MathUtils.cosDeg(150 - rotation),
+							2203 * MathUtils.sinDeg(150 - rotation)),
+					new Vector2(2203 * MathUtils.cosDeg(30 - rotation),
+							2203 * MathUtils.sinDeg(30 - rotation)))) {
+				Gdx.app.debug("PlayerSystem:Update:Shoot",
+						"Normal shoot orientation.");
+				c.position.x = a.x;
+				c.position.y = a.y;
 
-			c.velx = MathUtils.sinDeg(rotation);
-			c.vely = MathUtils.cosDeg(rotation);
+				c.rotation = rotation;
+
+				c.velx = MathUtils.sinDeg(rotation);
+				c.vely = MathUtils.cosDeg(rotation);
+				
+				light = new PointLight(game.lights, 512,
+						new Color(1, 1, 1, 0.25f).mul(Color.CYAN), 1, a.x + 0.05f
+								* MathUtils.sinDeg(rotation), a.y + 0.05f
+								* MathUtils.cosDeg(rotation));
+
+				orient = 0;
+			} else if (inTriange(game.getPointer(), new Vector2(0, 0),
+					new Vector2(2203 * MathUtils.cosDeg(-90 - rotation),
+							2203 * MathUtils.sinDeg(-90 - rotation)),
+					new Vector2(2203 * MathUtils.cosDeg(30 - rotation),
+							2203 * MathUtils.sinDeg(30 - rotation)))) {
+				Gdx.app.debug("PlayerSystem:Update:Shoot",
+						"Right shoot orientation.");
+				c.position.x = b.x;
+				c.position.y = b.y;
+
+				c.rotation = rotation + 120;
+
+				c.velx = MathUtils.sinDeg(rotation + 120);
+				c.vely = MathUtils.cosDeg(rotation + 120);
+				
+				light = new PointLight(game.lights, 512,
+						new Color(1, 1, 1, 0.25f).mul(Color.CYAN), 1, b.x + 0.05f
+								* MathUtils.sinDeg(rotation), b.y + 0.05f
+								* MathUtils.cosDeg(rotation));
+
+				orient = -120;
+			} else {
+				Gdx.app.debug("PlayerSystem:Update:Shoot",
+						"Left shoot orientation.");
+				c.position.x = this.c.x;
+				c.position.y = this.c.y;
+
+				c.rotation = rotation - 120;
+
+				c.velx = MathUtils.sinDeg(rotation - 120);
+				c.vely = MathUtils.cosDeg(rotation - 120);
+
+				light = new PointLight(game.lights, 512,
+						new Color(1, 1, 1, 0.25f).mul(Color.CYAN), 1, this.c.x + 0.05f
+								* MathUtils.sinDeg(rotation), this.c.y + 0.05f
+								* MathUtils.cosDeg(rotation));
+				
+				orient = +120;
+			}
+			
 			c.scale = BULLETSIZE;
 
-			light = new PointLight(game.lights, 512,
-					new Color(1, 1, 1, 0.f).mul(Color.CYAN), 1, a.x + 0.05f
-							* MathUtils.sinDeg(rotation), a.y + 0.05f
-							* MathUtils.cosDeg(rotation));
+			
 
 			game.bullet.addBullet(c);
 		} else if (!Gdx.input.isTouched() && touched) {
@@ -263,26 +306,31 @@ public class PlayerSystem extends EntitySystem implements ContactListener {
 
 		if (size > 0) {
 
-			rotation = nlerp(delta * 7, rotation, direction);
+			rotation = nlerp(delta * 7, rotation, torotation);
 
 			game.shape.setColor(Color.LIGHT_GRAY.mul(Color.CYAN));
 
 			if (coolDown <= 0) {
 
+				float tsize = size / 2f;
+
 				// Draw the Triangle
-				a.set(size / 2f * MathUtils.sinDeg(rotation), size / 2f
-						* MathUtils.cosDeg(rotation));
-				b.set(a.x * MathUtils.cosDeg(240)
-						- (a.y * MathUtils.sinDeg(240)),
-						a.x * MathUtils.sinDeg(240)
-								+ (a.y * MathUtils.cosDeg(240)));
-				c.set(a.x * MathUtils.cosDeg(120)
-						- (a.y * MathUtils.sinDeg(120)),
-						a.x * MathUtils.sinDeg(120)
-								+ (a.y * MathUtils.cosDeg(120)));
+				a.set(tsize * MathUtils.sinDeg(rotation),
+						tsize * MathUtils.cosDeg(rotation));
+				b.set(tsize * MathUtils.sinDeg(rotation + 120), tsize
+						* MathUtils.cosDeg(rotation + 120));
+				c.set(tsize * MathUtils.sinDeg(rotation - 120), tsize
+						* MathUtils.cosDeg(rotation - 120));
 
 				game.shape.triangle(a.x, a.y, c.x, c.y, b.x, b.y);
 			} else {
+
+				/**
+				 * Temporary rotation: used to render the trapezoid at different
+				 * orientations
+				 */
+				float trotation = rotation - orient;
+				// other points.
 
 				// calculate the modifications to the triangle
 				float progress = 0;
@@ -300,16 +348,15 @@ public class PlayerSystem extends EntitySystem implements ContactListener {
 						health -= BULLETSIZE;
 
 						// Calculate the points of the triangle.
-						a.set(size / 2f * MathUtils.sinDeg(rotation), size / 2f
-								* MathUtils.cosDeg(rotation));
-						b.set(a.x * MathUtils.cosDeg(240)
-								- (a.y * MathUtils.sinDeg(240)),
-								a.x * MathUtils.sinDeg(240)
-										+ (a.y * MathUtils.cosDeg(240)));
-						c.set(a.x * MathUtils.cosDeg(120)
-								- (a.y * MathUtils.sinDeg(120)),
-								a.x * MathUtils.sinDeg(120)
-										+ (a.y * MathUtils.cosDeg(120)));
+
+						float tsize = size / 2f;
+
+						a.set(tsize * MathUtils.sinDeg(trotation), tsize
+								* MathUtils.cosDeg(trotation));
+						b.set(tsize * MathUtils.sinDeg(trotation + 120), tsize
+								* MathUtils.cosDeg(trotation + 120));
+						c.set(tsize * MathUtils.sinDeg(trotation - 120), tsize
+								* MathUtils.cosDeg(trotation - 120));
 
 						// Draw the triangle.
 						game.shape.triangle(a.x, a.y, c.x, c.y, b.x, b.y);
@@ -321,30 +368,27 @@ public class PlayerSystem extends EntitySystem implements ContactListener {
 					// Calculate the progress of the transition, and interpolate
 					// it
 					// to make it smooth.
-					progress = 1 - coolDown / COOLDOWN/difficulty;
+					progress = 1 - coolDown / COOLDOWN / difficulty;
 					progress = Interpolation.pow2Out.apply(progress);
 					progress *= BULLETSIZE;
 
 				}
 
 				// Calculate the points of the triangle.
-				a.set((size / 2f - progress / 2f) * MathUtils.sinDeg(rotation),
-						(size / 2f - progress / 2f)
-								* MathUtils.cosDeg(rotation));
-				b.set(a.x * MathUtils.cosDeg(240)
-						- (a.y * MathUtils.sinDeg(240)),
-						a.x * MathUtils.sinDeg(240)
-								+ (a.y * MathUtils.cosDeg(240)));
-				c.set(a.x * MathUtils.cosDeg(120)
-						- (a.y * MathUtils.sinDeg(120)),
-						a.x * MathUtils.sinDeg(120)
-								+ (a.y * MathUtils.cosDeg(120)));
+				float tsize = size / 2f - progress / 2f;
+
+				a.set(tsize * MathUtils.sinDeg(trotation),
+						tsize * MathUtils.cosDeg(trotation));
+				b.set(tsize * MathUtils.sinDeg(trotation + 120), tsize
+						* MathUtils.cosDeg(trotation + 120));
+				c.set(tsize * MathUtils.sinDeg(trotation - 120), tsize
+						* MathUtils.cosDeg(trotation - 120));
+
 				e.set(point(a, c, (BULLETSIZE - progress) / size));
 				d.set(point(a, b, (BULLETSIZE - progress) / size));
 
 				// Draw the Triangle without the top.
 				game.shape.triangle(e.x, e.y, d.x, d.y, b.x, b.y);
-
 				game.shape.triangle(e.x, e.y, c.x, c.y, b.x, b.y);
 
 				// Resize the box2D triangle
@@ -352,6 +396,22 @@ public class PlayerSystem extends EntitySystem implements ContactListener {
 			}
 		}
 
+	}
+
+	private boolean inTriange(Vector2 p, Vector2 p0, Vector2 p1, Vector2 p2) {
+		float a = 0.5f * (-p1.y * p2.x + p0.y * (-p1.x + p2.x) + p0.x
+				* (p1.y - p2.y) + p1.x * p2.y);
+
+		float sign = a < 0 ? -1 : 1;
+
+		float s = (p0.y * p2.x - p0.x * p2.y + (p2.y - p0.y) * p.x + (p0.x - p2.x)
+				* p.y)
+				* sign;
+		float t = (p0.x * p1.y - p0.y * p1.x + (p0.y - p1.y) * p.x + (p1.x - p0.x)
+				* p.y)
+				* sign;
+
+		return s > 0 && t > 0 && (s + t) < 2 * a * sign;
 	}
 
 	public void damage(float health) {
@@ -376,7 +436,7 @@ public class PlayerSystem extends EntitySystem implements ContactListener {
 	}
 
 	public void setRotation(float rotation) {
-		direction = rotation;
+		torotation = rotation;
 	}
 
 	/**
@@ -431,9 +491,12 @@ public class PlayerSystem extends EntitySystem implements ContactListener {
 
 			PooledEffect effect1 = game.circle.circleEffect.obtain();
 			effect1.setPosition(circ.position.x, circ.position.y);
-			effect1.getEmitters().get(0).getTint().setColors(new float[] {
-					circ.color.r, circ.color.g, circ.color.b
-			});
+			effect1.getEmitters()
+					.get(0)
+					.getTint()
+					.setColors(
+							new float[] { circ.color.r, circ.color.g,
+									circ.color.b });
 			effect1.getEmitters().get(0).getScale().setHigh(circ.scale);
 			game.particle.addEffect(effect1);
 
@@ -451,9 +514,12 @@ public class PlayerSystem extends EntitySystem implements ContactListener {
 
 			PooledEffect effect1 = game.cube.squareEffect.obtain();
 			effect1.setPosition(cube.position.x, cube.position.y);
-			effect1.getEmitters().get(0).getTint().setColors(new float[] {
-					cube.color.r, cube.color.g, cube.color.b
-			});
+			effect1.getEmitters()
+					.get(0)
+					.getTint()
+					.setColors(
+							new float[] { cube.color.r, cube.color.g,
+									cube.color.b });
 			effect1.getEmitters().get(0).getScale().setHigh(cube.scale);
 			game.particle.addEffect(effect1);
 
