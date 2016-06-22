@@ -54,7 +54,10 @@ public class BulletSystem extends EntitySystem implements ContactListener {
 
 	@Override
 	public void update(float delta) {
-
+		//compensate for speed related powerups.
+		delta /= game.speed;
+		
+		
 		// Set the color to draw the bullets.
 		game.shape.setColor(Color.LIGHT_GRAY.mul(Color.CYAN));
 
@@ -154,7 +157,7 @@ public class BulletSystem extends EntitySystem implements ContactListener {
 		bc.body.createFixture(fdef);
 
 		// Set the velocity of the bullet.
-		bc.body.setLinearVelocity(new Vector2(bc.velx, bc.vely));
+		bc.body.setLinearVelocity(new Vector2(bc.velx/game.speed, bc.vely/game.speed));
 
 	}
 

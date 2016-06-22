@@ -470,21 +470,22 @@ public class GameScreen extends AbstractGameScreen implements InputProcessor {
 
 	@Override
 	public boolean keyDown(int keycode) {
-		if (keycode == Keys.BACK) {
+		if (keycode == Keys.BACK || keycode == Keys.Q) {
 			// Change screens to the menu when the back button is pressed.
 			ScreenTransition transition = ScreenTransitionSlide.init(0.5f,
 					ScreenTransitionSlide.RIGHT, false, Interpolation.pow2);
 			game.setScreen(new MenuScreen(game), transition);
+			if(!Global.Config.MUTE && Assets.instance.sounds.slowMusic.isPlaying()) {
+				Assets.instance.sounds.slowMusic.pause();
+				Assets.instance.sounds.music.setPosition(Assets.instance.sounds.slowMusic.getPosition()/2f);
+				Assets.instance.sounds.music.play();
+			}
 		}
 
 		// Debug operations on Desktop.
 		if (Gdx.app.getType() == ApplicationType.Desktop) {
 			if (keycode == Keys.E) {
 				debug = !debug;
-			} else if (keycode == Keys.Q) {
-				ScreenTransition transition = ScreenTransitionSlide.init(0.5f,
-						ScreenTransitionSlide.RIGHT, false, Interpolation.pow2);
-				game.setScreen(new MenuScreen(game), transition);
 			}
 		}
 		return false;

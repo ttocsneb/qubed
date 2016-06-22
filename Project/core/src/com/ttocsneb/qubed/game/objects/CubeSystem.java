@@ -201,7 +201,7 @@ public class CubeSystem extends EntitySystem implements ContactListener, com.tto
 			game.powerup.addPowerup(cubeComp.powerup);
 		} else if(MathUtils.randomBoolean(0.143f)) {
 			//The actual probability is 10% because (1-30%) * (14.3%) = 10%
-			cubeComp.powerup = new SlowPowerup(cubeComp, Math.min(0.9f, (MathUtils.random(0.25f, 0.75f)/cubeComp.scale)), MathUtils.random(1f, 7f), game);
+			cubeComp.powerup = new SlowPowerup(cubeComp, MathUtils.random(4f, 16f), game);
 			game.powerup.addPowerup(cubeComp.powerup);
 		}
 

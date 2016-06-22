@@ -238,7 +238,7 @@ public class CircleSystem extends EntitySystem implements ContactListener, Spawn
 			game.powerup.addPowerup(circComp.powerup);
 		} else if(MathUtils.randomBoolean(0.143f)) {
 			//The actual probability is 10% because (1-30%) * (14.3%) = 10%
-			circComp.powerup = new SlowPowerup(circComp, Math.min(0.9f, (MathUtils.random(0.25f, 0.75f)/circComp.scale)), MathUtils.random(1f, 7f), game);
+			circComp.powerup = new SlowPowerup(circComp, MathUtils.random(4f, 16f), game);
 			game.powerup.addPowerup(circComp.powerup);
 		}
 		addCircle(circComp);		

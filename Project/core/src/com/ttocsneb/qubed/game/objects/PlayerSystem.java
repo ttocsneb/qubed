@@ -34,8 +34,6 @@ import com.ttocsneb.qubed.util.Assets;
  */
 public class PlayerSystem extends EntitySystem implements ContactListener {
 
-	// TODO allow the player to shoot from any corner.
-
 	private ParticleEffectPool triangleEffect;
 
 	private static final float COOLDOWN = 0.5f;
@@ -52,9 +50,9 @@ public class PlayerSystem extends EntitySystem implements ContactListener {
 	private float size;
 	/** TODO add desc. */
 	private float health;
-	/** TODO add desc. */
+	/** Time it takes to regenerate the missing corner from shooting */
 	private float coolDown = 0;
-	/** TODO add desc. */
+	/** Time before the player regenerates its missing corner after shooting. */
 	private float delay = DELAY;
 	/** Used for touch events. */
 	private boolean touched = true;
@@ -187,6 +185,9 @@ public class PlayerSystem extends EntitySystem implements ContactListener {
 
 	@Override
 	public void update(float delta) {
+		//Compensate the slow downs from slowmotion powerups.
+		delta /= game.speed;
+		
 		body.setTransform(body.getPosition(), (360 - rotation)
 				* MathUtils.degreesToRadians);
 
@@ -201,10 +202,15 @@ public class PlayerSystem extends EntitySystem implements ContactListener {
 		if (size > BULLETSIZE && coolDown / difficulty <= 0
 				&& Gdx.input.isTouched() && !touched) {
 
+			Gdx.input.vibrate(new long[]{0, 10, 10, 10, 10, 10, 10}, -1);
 			
 			touched = true;
-			coolDown = COOLDOWN / difficulty;
-			delay = DELAY / difficulty;
+			
+			float maxTime = (COOLDOWN+DELAY)/difficulty;
+			
+			delay = Math.max(maxTime-COOLDOWN, 0);
+			coolDown = Math.min(maxTime, COOLDOWN);
+			
 			BulletComponent c = new BulletComponent();
 
 			//decide which point to shoot from.
@@ -289,6 +295,11 @@ public class PlayerSystem extends EntitySystem implements ContactListener {
 
 		// Health
 		if (size != health) {
+			//Shrink to nothing when the player can no longer shoot.
+			if(size < BULLETSIZE) {
+				health = 0;
+			}
+			
 			size = lerp(delta * 5, size, health);
 
 			if (Math.abs(size - health) < 0.01f) {
@@ -479,9 +490,18 @@ public class PlayerSystem extends EntitySystem implements ContactListener {
 	@Override
 	public void beginContact(Component object, Object object2) {
 
+		
 		if (object2 instanceof CircleComponent) {
 			CircleComponent circ = (CircleComponent) object2;
 			circ.die = true;
+
+			long[] tmp = new long[9];
+			tmp[0] = 0;
+			for(int i=1; i<tmp.length; i+=2) {
+				tmp[i] = (long)(25/game.speed);
+				tmp[i+1] = (long)(5/game.speed);
+			}
+			Gdx.input.vibrate(tmp, -1);
 
 			PooledEffect effect = triangleEffect.obtain();
 			effect.setPosition(0, 0);
@@ -505,6 +525,14 @@ public class PlayerSystem extends EntitySystem implements ContactListener {
 		if (object2 instanceof CubeComponent) {
 			CubeComponent cube = (CubeComponent) object2;
 			cube.die = true;
+
+			long[] tmp = new long[9];
+			tmp[0] = 0;
+			for(int i=1; i<tmp.length; i+=2) {
+				tmp[i] = (long)(25/game.speed);
+				tmp[i+1] = (long)(5/game.speed);
+			}
+			Gdx.input.vibrate(tmp, -1);
 
 			PooledEffect effect = triangleEffect.obtain();
 			effect.setPosition(0, 0);

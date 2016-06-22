@@ -125,13 +125,15 @@ public class Assets implements Disposable, AssetErrorListener {
 	 *
 	 */
 	public class AssetSounds {
-
-		// public final Sound load;
+		
 		public final Music music;
+		
+		public final Music slowMusic;
 
 		public AssetSounds(AssetManager am) {
-			// load = am.get("sounds/Load.wav", Sound.class);
 			music = am.get("music/Voice Over Under.mp3", Music.class);
+			
+			slowMusic = am.get("music/Voice Over Under - slo.mp3", Music.class);
 		}
 
 	}
@@ -229,6 +231,7 @@ public class Assets implements Disposable, AssetErrorListener {
 		}
 
 		assetManager.load("music/Voice Over Under.mp3", Music.class);
+		assetManager.load("music/Voice Over Under - slo.mp3", Music.class);
 
 	}
 
