@@ -1,6 +1,5 @@
 package com.ttocsneb.qubed;
 
-import com.badlogic.gdx.Application;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.assets.AssetManager;
@@ -24,11 +23,20 @@ import com.ttocsneb.qubed.util.Global;
  *
  */
 public class Main extends DirectedGame {
-
+	String Version;
+	
+	public Main(String version) {
+		Version = version;
+	}
+	
 	@Override
 	public void create() {
 		// Set the log level.
-		Gdx.app.setLogLevel(Application.LOG_DEBUG);
+		//Gdx.app.setLogLevel(Application.LOG_DEBUG);
+		
+		Global.version = Version;
+		Gdx.app.debug("Main", Global.version);
+		
 
 		// Don't crash for missing variables in shaderPrograms.
 		ShaderProgram.pedantic = false;

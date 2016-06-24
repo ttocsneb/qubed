@@ -29,7 +29,7 @@ public class AndroidLauncher extends AndroidApplication {
 
 		config.numSamples = 2;
 
-		initialize(new Main(), config);
+		initialize(new Main(getString(R.string.Version)), config);
 
 		// Hide any virtual buttons if the OS is KITKAT or above.
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {

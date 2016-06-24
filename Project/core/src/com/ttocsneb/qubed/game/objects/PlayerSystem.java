@@ -48,7 +48,7 @@ public class PlayerSystem extends EntitySystem implements ContactListener {
 	private float rotation; // Current rotation
 	/** The size of the player */
 	private float size;
-	/** TODO add desc. */
+	/** The desired size of the player */
 	private float health;
 	/** Time it takes to regenerate the missing corner from shooting */
 	private float coolDown = 0;
@@ -167,7 +167,7 @@ public class PlayerSystem extends EntitySystem implements ContactListener {
 	 * @return <b>true</b> if the player has died.
 	 */
 	public boolean died() {
-		return health <= BULLETSIZE;
+		return health == 0;
 	}
 
 	private Vector2 point(Vector2 a, Vector2 b, float percent) {
@@ -197,7 +197,16 @@ public class PlayerSystem extends EntitySystem implements ContactListener {
 		//
 		// ///////////////////////////////////////////////////////////
 
-		
+		if(game.debug) {
+			game.shape.setColor(Color.BLACK);
+			game.shape.rectLine(new Vector2(0, 0), new Vector2(2203 * MathUtils.cosDeg(150 - rotation),
+							2203 * MathUtils.sinDeg(150 - rotation)), 0.01f);
+			game.shape.rectLine(new Vector2(0, 0), new Vector2(2203 * MathUtils.cosDeg(30 - rotation),
+							2203 * MathUtils.sinDeg(30 - rotation)), 0.01f);
+			game.shape.rectLine(new Vector2(0, 0), new Vector2(2203 * MathUtils.cosDeg(-90 - rotation),
+							2203 * MathUtils.sinDeg(-90 - rotation)), 0.01f);
+		}
+
 		// Shoot if the player has tapped the screen.
 		if (size > BULLETSIZE && coolDown / difficulty <= 0
 				&& Gdx.input.isTouched() && !touched) {
@@ -294,11 +303,11 @@ public class PlayerSystem extends EntitySystem implements ContactListener {
 		}
 
 		// Health
+		//Shrink to nothing when the player can no longer shoot.
+		if(health < BULLETSIZE) {
+			health = 0;
+		}
 		if (size != health) {
-			//Shrink to nothing when the player can no longer shoot.
-			if(size < BULLETSIZE) {
-				health = 0;
-			}
 			
 			size = lerp(delta * 5, size, health);
 

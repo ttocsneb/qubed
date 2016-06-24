@@ -40,6 +40,10 @@ public class MenuScreen extends AbstractGameScreen implements GestureListener {
 	private BitmapFont font;
 	private GlyphLayout title;
 	private GlyphLayout highscore;
+	private GlyphLayout version;
+	private GlyphLayout bug;
+	
+	private boolean touchedBug;
 
 	// Camera
 	private OrthographicCamera cam;
@@ -47,7 +51,7 @@ public class MenuScreen extends AbstractGameScreen implements GestureListener {
 	// Sound stuffs.
 	private TextureRegion speaker;
 	private TextureRegion speakerOff;
-	private boolean touched;
+	private boolean touchedVol;
 
 	// Arrow Animation Variables.
 	private float animInterp;
@@ -81,6 +85,10 @@ public class MenuScreen extends AbstractGameScreen implements GestureListener {
 
 		// Create the Title
 		title = new GlyphLayout(font, "QUBED");
+		
+		version = new GlyphLayout(Assets.instance.fonts.small, "v." +Global.version, Color.BLACK, 0, Align.topLeft, false);
+		
+		bug = new GlyphLayout(Assets.instance.fonts.med, "Report a bug", new Color(51/255f, 177/255f, 1, 1), 0, Align.center, false);
 
 		highscore = new GlyphLayout(Assets.instance.fonts.large,
 				Global.Config.HIGHSCORE + "", Color.BLACK, 0, Align.center,
@@ -102,6 +110,9 @@ public class MenuScreen extends AbstractGameScreen implements GestureListener {
 		drag = new DragAnim();
 		tapTimer = 15;
 
+		//Allow the application to close when the back button(on Android) is pressed.
+		Gdx.input.setCatchBackKey(false);
+		
 		Gdx.app.debug(
 				"MenuScreen",
 				Gdx.input.isPeripheralAvailable(Peripheral.Accelerometer) ? "This device has an accelerometer"
@@ -174,22 +185,40 @@ public class MenuScreen extends AbstractGameScreen implements GestureListener {
 			Vector3 v3 = cam.unproject(new Vector3(Gdx.input.getX(), Gdx.input
 					.getY(), 0));
 			// Detect Touch Events.
-			if (!touched && v3.x > 0 && v3.x < speaker.getRegionWidth()
+			if (!touchedVol && v3.x > 0 && v3.x < speaker.getRegionWidth()
 					&& v3.y > 1920 - speaker.getRegionHeight() && v3.y < 1920) {
-				touched = true;
-			} else if (touched
+				touchedVol = true;
+			} else if (touchedVol
 					&& !(v3.x > 0 && v3.x < speaker.getRegionWidth()
 							&& v3.y > 1920 - speaker.getRegionHeight() && v3.y < 1920))
-				touched = false;
-		} else if (touched) {
+				touchedVol = false;
+			
+			//Detect when the bug link is clicked
+			if(!touchedBug && v3.x > 1080/2-bug.width/2 && v3.x < 1080/2+bug.width/2 
+					&& v3.y > 1915-bug.height && v3.y < 1915) {
+				touchedBug = true;
+				bug.setText(Assets.instance.fonts.med, "Report a bug", new Color(0, 119/255f, 213/255f, 1), 0, Align.center, false);
+			}
+			else if(touchedBug && !(v3.x > 1080/2-bug.width/2 && v3.x < 1080/2+bug.width/2 
+					&& v3.y > 1915-bug.height && v3.y < 1915)) {
+				touchedBug = false;
+				bug.setText(Assets.instance.fonts.med, "Report a bug", new Color(51/255f, 177/255f, 1, 1), 0, Align.center, false);
+			}
+			
+		} else if (touchedVol) {
 			// Activate/deactivate the music.
-			touched = false;
+			touchedVol = false;
 			Global.Config.MUTE = !Global.Config.MUTE;
 			if (Global.Config.MUTE)
 				Assets.instance.sounds.music.pause();
 			else
 				Assets.instance.sounds.music.play();
 			Global.Config.save();
+		} else if(touchedBug) {
+			//open the browser when the bug link is clicked
+			touchedBug = false;
+			Gdx.net.openURI("http://ttocsneb.com/qubed-bug");
+			bug.setText(Assets.instance.fonts.med, "Report a bug", new Color(51/255f, 177/255f, 1, 1), 0, Align.center, false);
 		}
 
 		cam.update();
@@ -201,6 +230,10 @@ public class MenuScreen extends AbstractGameScreen implements GestureListener {
 		font.draw(batch, title, 1080 / 2 - title.width / 2, 1920 * 3 / 4f);
 		Assets.instance.fonts.large.draw(batch, highscore, 540,
 				highscore.height + 10);
+		
+		Assets.instance.fonts.small.draw(batch, version, 5, version.height+5);
+		
+		Assets.instance.fonts.med.draw(batch, bug, 1080/2, 1915);
 
 		Assets.instance.fonts.med.setColor(Color.BLACK);
 

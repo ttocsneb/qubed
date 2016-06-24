@@ -4,6 +4,7 @@ import box2dLight.DirectionalLight;
 import box2dLight.RayHandler;
 
 import com.badlogic.ashley.core.Engine;
+import com.badlogic.gdx.Application;
 import com.badlogic.gdx.Application.ApplicationType;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
@@ -88,7 +89,7 @@ public class GameScreen extends AbstractGameScreen implements InputProcessor {
 	private float orientation;
 	private float rotation;
 	// Debug variables.
-	private boolean debug;
+	public boolean debug;
 
 	private BitmapFont font;
 	private BitmapFont smol;
@@ -122,6 +123,8 @@ public class GameScreen extends AbstractGameScreen implements InputProcessor {
 
 	@Override
 	public void show() {
+		debug = Gdx.app.getLogLevel() == Application.LOG_DEBUG;
+		
 		speed = 1f;
 		rotationSpeed = 1f;
 

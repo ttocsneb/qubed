@@ -72,6 +72,7 @@ public class Global {
 	}
 
 	public static boolean start = false;
+	public static String version;
 
 	public static void dispose() {
 		batch.dispose();
