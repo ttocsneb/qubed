@@ -20,7 +20,6 @@ import com.ttocsneb.qubed.game.objects.components.CubeComponent;
 import com.ttocsneb.qubed.game.powerups.HealthPowerup;
 import com.ttocsneb.qubed.game.powerups.SlowPowerup;
 import com.ttocsneb.qubed.screen.GameScreen;
-import com.ttocsneb.qubed.util.Assets;
 import com.ttocsneb.qubed.util.Global;
 
 /**
@@ -45,7 +44,7 @@ public class CubeSystem extends EntitySystem implements ContactListener, com.tto
 		game = gs;
 
 		squareEffect = new ParticleEffectPool(
-				Assets.instance.particles.squareExp, 1, 5);
+				Global.assets.particles.squareExp, 1, 5);
 	}
 
 	@Override

@@ -1,5 +1,6 @@
 package com.ttocsneb.qubed;
 
+import com.badlogic.gdx.Application;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.assets.AssetManager;
@@ -13,7 +14,6 @@ import com.ttocsneb.qubed.screen.DirectedGame;
 import com.ttocsneb.qubed.screen.MenuScreen;
 import com.ttocsneb.qubed.screen.transitions.ScreenTransition;
 import com.ttocsneb.qubed.screen.transitions.ScreenTransitionFade;
-import com.ttocsneb.qubed.util.Assets;
 import com.ttocsneb.qubed.util.Global;
 
 /**
@@ -32,7 +32,7 @@ public class Main extends DirectedGame {
 	@Override
 	public void create() {
 		// Set the log level.
-		//Gdx.app.setLogLevel(Application.LOG_DEBUG);
+		Gdx.app.setLogLevel(Application.LOG_DEBUG);
 		
 		Global.version = Version;
 		Gdx.app.debug("Main", Global.version);
@@ -41,15 +41,36 @@ public class Main extends DirectedGame {
 		// Don't crash for missing variables in shaderPrograms.
 		ShaderProgram.pedantic = false;
 
+		Global.init();
+		
 		// Load Settings
 		Global.Config.load();
-
+		
+		
+		
 		// Init the assets.
-		Assets.instance.init(new AssetManager());
+		Global.assets.init(new AssetManager());
+		
+		//"Temporarily" skip the loading screen as it takes a negligible amount of time.
+		Global.assets.finishLoading();
+		ScreenTransition fade = ScreenTransitionFade.init(0.5f);
+		setScreen(new MenuScreen(this), fade);
 
 		//start the loading screen
-		setScreen(new LoadScreen(this));
+		//setScreen(new LoadScreen(this));
 
+	}
+	
+	@Override
+	public void pause() {
+		super.pause();
+		Gdx.app.debug("Main", "PAUSE!!");
+	}
+	
+	@Override
+	public void resume() {
+		super.pause();
+		Gdx.app.debug("Main", "UNPAUSE!!!");
 	}
 
 	/**
@@ -57,6 +78,7 @@ public class Main extends DirectedGame {
 	 * @author TtocsNeb
 	 *
 	 */
+	@SuppressWarnings("unused")//This is not used, but may be used later in development if loading time takes to long.
 	private class LoadScreen extends AbstractGameScreen {
 
 		private float prog;
@@ -88,7 +110,7 @@ public class Main extends DirectedGame {
 							: 0));
 
 			//Get the loading progress.
-			float tmp = Assets.instance.getProgress();
+			float tmp = Global.assets.getProgress();
 
 			//linearly interpolate the progress, to make it look pretty.
 			prog = Math.min(tmp, Global.lerp(time += 1 / 20f, 0, 1));
@@ -112,12 +134,12 @@ public class Main extends DirectedGame {
 			Global.shape.end();
 
 			//When the assets load, start the game.
-			if (!loaded && Assets.instance.isLoaded() && prog >= 1.0) {
+			if (!loaded && Global.assets.isLoaded() && prog >= 1.0) {
 				loaded = true;
 				// Start playing music if turned on.
-				Assets.instance.sounds.music.setLooping(true);
+				Global.assets.sounds.music.setLooping(true);
 				if (!Global.Config.MUTE) {
-					Assets.instance.sounds.music.play();
+					Global.assets.sounds.music.play();
 				}
 
 				// Transition to the MenuScreen.
@@ -157,5 +179,6 @@ public class Main extends DirectedGame {
 	public void dispose() {
 		super.dispose();
 		Global.dispose();
+		Gdx.app.debug("Main", "Destroyed!!!!!!!@$3");
 	}
 }

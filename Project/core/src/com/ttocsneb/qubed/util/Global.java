@@ -13,20 +13,34 @@ import com.badlogic.gdx.math.MathUtils;
  * @author TtocsNeb
  *
  */
-public class Global {
+public class Global  {
 
 	public static final float VIEWPORT_WIDTH = 4;
 	public static final float VIEWPORT_GUI_HEIGHT = 7.111111f;
 	
 	public static final String TEXTURE_ATLAS = "textures/textures.atlas";
 
-	public static final SpriteBatch batch = new SpriteBatch();
-	public static final ShapeRenderer shape = new ShapeRenderer();
+	// These objects cannot be final as when the app is reloaded, 
+	// after being closed by the back button, the objects are
+	// lost and need to be reinitialized.
+	public static SpriteBatch batch = new SpriteBatch();
+	public static ShapeRenderer shape = new ShapeRenderer();
 	
 	public static final Color RED = new Color(218/255f, 67/255f, 32/255f, 1);
 	public static final Color ORANGE = new Color(250/255f, 128/255f, 40/255f, 1);
 	public static final Color BLUE = new Color(49/255f, 136/255f, 183/255f, 1);
 	public static final Color GREEN = new Color(63/255f, 193/255f, 91/255f, 1);
+	
+	public static Assets assets = new Assets();
+	
+	/**
+	 * initialize special objects that are lost after the app is reloaded.
+	 */
+	public static void init() {
+		if(batch == null) batch = new SpriteBatch();
+		if(shape == null) shape = new ShapeRenderer();
+		if(assets == null) assets = new Assets();
+	}
 
 	/**
 	 * Performs a linear interpolation
@@ -77,6 +91,12 @@ public class Global {
 	public static void dispose() {
 		batch.dispose();
 		shape.dispose();
+		assets.dispose();
+		
+		batch = null;
+		shape = null;
+		assets = null;
+		
 	}
 
 	public static Color selectColor() {

@@ -6,6 +6,6 @@
     <string name="splash_desc">Splash</string>
     <color name="blue">#3187b6</color>
     <color name="dark_blue">#215d7d</color>
-    <string name="Version">0.2</string>
+    <string name="Version">0.3.0</string>
 
 </resources>

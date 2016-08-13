@@ -21,7 +21,6 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Align;
 import com.ttocsneb.qubed.screen.transitions.ScreenTransition;
 import com.ttocsneb.qubed.screen.transitions.ScreenTransitionSlide;
-import com.ttocsneb.qubed.util.Assets;
 import com.ttocsneb.qubed.util.Global;
 
 /**
@@ -76,21 +75,21 @@ public class MenuScreen extends AbstractGameScreen implements GestureListener {
 	public void show() {
 
 		// Load assets.
-		speaker = Assets.instance.textures.speaker;
-		speakerOff = Assets.instance.textures.speakerOff;
+		speaker = Global.assets.textures.speaker;
+		speakerOff = Global.assets.textures.speakerOff;
 
 		// Load fonts.
-		font = Assets.instance.fonts.huge;
+		font = Global.assets.fonts.huge;
 		font.setColor(Color.BLACK);
 
 		// Create the Title
 		title = new GlyphLayout(font, "QUBED");
 		
-		version = new GlyphLayout(Assets.instance.fonts.small, "v." +Global.version, Color.BLACK, 0, Align.topLeft, false);
+		version = new GlyphLayout(Global.assets.fonts.small, "v." +Global.version, Color.BLACK, 0, Align.topLeft, false);
 		
-		bug = new GlyphLayout(Assets.instance.fonts.med, "Report a bug", new Color(51/255f, 177/255f, 1, 1), 0, Align.center, false);
+		bug = new GlyphLayout(Global.assets.fonts.med, "Report a bug", new Color(51/255f, 177/255f, 1, 1), 0, Align.center, false);
 
-		highscore = new GlyphLayout(Assets.instance.fonts.large,
+		highscore = new GlyphLayout(Global.assets.fonts.large,
 				Global.Config.HIGHSCORE + "", Color.BLACK, 0, Align.center,
 				false);
 
@@ -197,12 +196,12 @@ public class MenuScreen extends AbstractGameScreen implements GestureListener {
 			if(!touchedBug && v3.x > 1080/2-bug.width/2 && v3.x < 1080/2+bug.width/2 
 					&& v3.y > 1915-bug.height && v3.y < 1915) {
 				touchedBug = true;
-				bug.setText(Assets.instance.fonts.med, "Report a bug", new Color(0, 119/255f, 213/255f, 1), 0, Align.center, false);
+				bug.setText(Global.assets.fonts.med, "Report a bug", new Color(0, 119/255f, 213/255f, 1), 0, Align.center, false);
 			}
 			else if(touchedBug && !(v3.x > 1080/2-bug.width/2 && v3.x < 1080/2+bug.width/2 
 					&& v3.y > 1915-bug.height && v3.y < 1915)) {
 				touchedBug = false;
-				bug.setText(Assets.instance.fonts.med, "Report a bug", new Color(51/255f, 177/255f, 1, 1), 0, Align.center, false);
+				bug.setText(Global.assets.fonts.med, "Report a bug", new Color(51/255f, 177/255f, 1, 1), 0, Align.center, false);
 			}
 			
 		} else if (touchedVol) {
@@ -210,15 +209,15 @@ public class MenuScreen extends AbstractGameScreen implements GestureListener {
 			touchedVol = false;
 			Global.Config.MUTE = !Global.Config.MUTE;
 			if (Global.Config.MUTE)
-				Assets.instance.sounds.music.pause();
+				Global.assets.sounds.music.pause();
 			else
-				Assets.instance.sounds.music.play();
+				Global.assets.sounds.music.play();
 			Global.Config.save();
 		} else if(touchedBug) {
 			//open the browser when the bug link is clicked
 			touchedBug = false;
 			Gdx.net.openURI("http://ttocsneb.com/qubed-bug");
-			bug.setText(Assets.instance.fonts.med, "Report a bug", new Color(51/255f, 177/255f, 1, 1), 0, Align.center, false);
+			bug.setText(Global.assets.fonts.med, "Report a bug", new Color(51/255f, 177/255f, 1, 1), 0, Align.center, false);
 		}
 
 		cam.update();
@@ -228,14 +227,14 @@ public class MenuScreen extends AbstractGameScreen implements GestureListener {
 
 		// Draw the title to the screen.
 		font.draw(batch, title, 1080 / 2 - title.width / 2, 1920 * 3 / 4f);
-		Assets.instance.fonts.large.draw(batch, highscore, 540,
+		Global.assets.fonts.large.draw(batch, highscore, 540,
 				highscore.height + 10);
 		
-		Assets.instance.fonts.small.draw(batch, version, 5, version.height+5);
+		Global.assets.fonts.small.draw(batch, version, 5, version.height+5);
 		
-		Assets.instance.fonts.med.draw(batch, bug, 1080/2, 1915);
+		Global.assets.fonts.med.draw(batch, bug, 1080/2, 1915);
 
-		Assets.instance.fonts.med.setColor(Color.BLACK);
+		Global.assets.fonts.med.setColor(Color.BLACK);
 
 		// Draw the speaker.
 		TextureRegion region = Global.Config.MUTE ? speakerOff : speaker;
@@ -282,7 +281,7 @@ public class MenuScreen extends AbstractGameScreen implements GestureListener {
 		private boolean done;
 
 		private DragAnim() {
-			finger = Assets.instance.textures.finger;
+			finger = Global.assets.textures.finger;
 			position = new Vector2();
 			strtPos = new Vector2();
 			endPos = new Vector2();

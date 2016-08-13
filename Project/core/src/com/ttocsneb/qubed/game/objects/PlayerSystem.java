@@ -24,7 +24,7 @@ import com.ttocsneb.qubed.game.objects.components.BulletComponent;
 import com.ttocsneb.qubed.game.objects.components.CircleComponent;
 import com.ttocsneb.qubed.game.objects.components.CubeComponent;
 import com.ttocsneb.qubed.screen.GameScreen;
-import com.ttocsneb.qubed.util.Assets;
+import com.ttocsneb.qubed.util.Global;
 
 /**
  * All logic for the Player.
@@ -69,7 +69,7 @@ public class PlayerSystem extends EntitySystem implements ContactListener {
 		game = gs;
 
 		triangleEffect = new ParticleEffectPool(
-				Assets.instance.particles.triangleExp, 1, 5);
+				Global.assets.particles.triangleExp, 1, 5);
 
 		// initiate the vectors.
 		a = new Vector2();

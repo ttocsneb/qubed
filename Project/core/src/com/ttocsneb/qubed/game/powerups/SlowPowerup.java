@@ -4,7 +4,6 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Interpolation;
 import com.ttocsneb.qubed.game.objects.GameObject;
 import com.ttocsneb.qubed.screen.GameScreen;
-import com.ttocsneb.qubed.util.Assets;
 import com.ttocsneb.qubed.util.Global;
 
 public class SlowPowerup extends Powerup {
@@ -28,7 +27,7 @@ public class SlowPowerup extends Powerup {
 	 */
 	public SlowPowerup(GameObject object, float time,
 			GameScreen gamescreen) {
-		super(object, Assets.instance.textures.slowPowerup, time*SPEED);
+		super(object, Global.assets.textures.slowPowerup, time*SPEED);
 		this.time = time*SPEED;
 		gameScreen = gamescreen;
 
@@ -40,9 +39,9 @@ public class SlowPowerup extends Powerup {
 		start = gameScreen.speed;
 		
 		if(!Global.Config.MUTE) {
-			Assets.instance.sounds.slowMusic.setPosition(Assets.instance.sounds.music.getPosition()*2);
-			Assets.instance.sounds.music.pause();
-			Assets.instance.sounds.slowMusic.play();
+			Global.assets.sounds.slowMusic.setPosition(Global.assets.sounds.music.getPosition()*2);
+			Global.assets.sounds.music.pause();
+			Global.assets.sounds.slowMusic.play();
 		}
 	}
 
@@ -67,9 +66,9 @@ public class SlowPowerup extends Powerup {
 	public void end() {
 		gameScreen.speed = 1;
 		if(!Global.Config.MUTE) {
-			Assets.instance.sounds.music.setPosition(Assets.instance.sounds.slowMusic.getPosition()/2);
-			Assets.instance.sounds.slowMusic.pause();
-			Assets.instance.sounds.music.play();
+			Global.assets.sounds.music.setPosition(Global.assets.sounds.slowMusic.getPosition()/2);
+			Global.assets.sounds.slowMusic.pause();
+			Global.assets.sounds.music.play();
 		}
 	}
 

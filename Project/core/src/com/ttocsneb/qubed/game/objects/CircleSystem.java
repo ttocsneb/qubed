@@ -22,7 +22,6 @@ import com.ttocsneb.qubed.game.powerups.HealthPowerup;
 import com.ttocsneb.qubed.game.powerups.SlowPowerup;
 import com.ttocsneb.qubed.game.spawn.Spawn;
 import com.ttocsneb.qubed.screen.GameScreen;
-import com.ttocsneb.qubed.util.Assets;
 import com.ttocsneb.qubed.util.Global;
 
 /**
@@ -45,7 +44,7 @@ public class CircleSystem extends EntitySystem implements ContactListener, Spawn
 	public CircleSystem(GameScreen gs) {
 		game = gs;
 		circleEffect = new ParticleEffectPool(
-				Assets.instance.particles.circleExp, 1, 5);
+				Global.assets.particles.circleExp, 1, 5);
 
 	}
 

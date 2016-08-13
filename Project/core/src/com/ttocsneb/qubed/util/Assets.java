@@ -27,8 +27,6 @@ public class Assets implements Disposable, AssetErrorListener {
 
 	private static final String TAG = Assets.class.getName();
 
-	public static final Assets instance = new Assets();
-
 	private AssetManager assetManager;
 	private boolean loaded;
 
@@ -313,9 +311,11 @@ public class Assets implements Disposable, AssetErrorListener {
 
 	@Override
 	public void dispose() {
+		Gdx.app.debug("Assets", "Destroyed");
 		assetManager.dispose();
 		fonts.dispose();
 		loaded = false;
+		
 	}
 
 }

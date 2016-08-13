@@ -38,7 +38,6 @@ import com.ttocsneb.qubed.game.spawn.json.SpawnObject;
 import com.ttocsneb.qubed.game.spawn.json.SpawnPattern;
 import com.ttocsneb.qubed.screen.transitions.ScreenTransition;
 import com.ttocsneb.qubed.screen.transitions.ScreenTransitionSlide;
-import com.ttocsneb.qubed.util.Assets;
 import com.ttocsneb.qubed.util.Global;
 
 /**
@@ -151,15 +150,15 @@ public class GameScreen extends AbstractGameScreen implements InputProcessor {
 		// Pattern();
 
 		spawner = new SpawnManager(this);
-		spawner.startPattern(Assets.instance.patterns.all[MathUtils
-				.random(Assets.instance.patterns.all.length - 1)]);
+		spawner.startPattern(Global.assets.patterns.all[MathUtils
+				.random(Global.assets.patterns.all.length - 1)]);
 
-		font = Assets.instance.fonts.huge;
-		smol = Assets.instance.fonts.large;
+		font = Global.assets.fonts.huge;
+		smol = Global.assets.fonts.large;
 		gameOver = new GlyphLayout(font, "GAME OVER",
 				new Color(Global.RED).mul(0.9f, 0.9f, 0.9f, 1), 1080,
 				Align.center, true);
-		scoreLabel = new GlyphLayout(Assets.instance.fonts.large, "0",
+		scoreLabel = new GlyphLayout(Global.assets.fonts.large, "0",
 				Color.WHITE, 0, Align.left, false);
 
 		difficulty = 1;
@@ -299,8 +298,8 @@ public class GameScreen extends AbstractGameScreen implements InputProcessor {
 		// Spawn objects.
 		spawner.update(delta, difficulty);
 		if (spawner.isPatternComplete()) {
-			spawner.startPattern(Assets.instance.patterns.all[MathUtils
-					.random(Assets.instance.patterns.all.length - 1)],
+			spawner.startPattern(Global.assets.patterns.all[MathUtils
+					.random(Global.assets.patterns.all.length - 1)],
 					MathUtils.random(5));
 			difficulty += 0.25f;
 		}
@@ -478,10 +477,10 @@ public class GameScreen extends AbstractGameScreen implements InputProcessor {
 			ScreenTransition transition = ScreenTransitionSlide.init(0.5f,
 					ScreenTransitionSlide.RIGHT, false, Interpolation.pow2);
 			game.setScreen(new MenuScreen(game), transition);
-			if(!Global.Config.MUTE && Assets.instance.sounds.slowMusic.isPlaying()) {
-				Assets.instance.sounds.slowMusic.pause();
-				Assets.instance.sounds.music.setPosition(Assets.instance.sounds.slowMusic.getPosition()/2f);
-				Assets.instance.sounds.music.play();
+			if(!Global.Config.MUTE && Global.assets.sounds.slowMusic.isPlaying()) {
+				Global.assets.sounds.slowMusic.pause();
+				Global.assets.sounds.music.setPosition(Global.assets.sounds.slowMusic.getPosition()/2f);
+				Global.assets.sounds.music.play();
 			}
 		}
 

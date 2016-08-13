@@ -3,7 +3,7 @@ package com.ttocsneb.qubed.screen;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.assets.AssetManager;
-import com.ttocsneb.qubed.util.Assets;
+import com.ttocsneb.qubed.util.Global;
 
 public abstract class AbstractGameScreen implements Screen {
 	protected DirectedGame game;
@@ -25,13 +25,13 @@ public abstract class AbstractGameScreen implements Screen {
 
 	@Override
 	public void resume() {
-		if(!Assets.instance.isLoaded())
-			Assets.instance.init(new AssetManager());
+		if(!Global.assets.isLoaded())
+			Global.assets.init(new AssetManager());
 	}
 
 	@Override
 	public void dispose() {
-		Assets.instance.dispose();
+		Global.assets.dispose();
 	}
 	
 	/**
