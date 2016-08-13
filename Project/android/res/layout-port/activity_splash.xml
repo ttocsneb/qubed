@@ -9,25 +9,38 @@
     
     <LinearLayout
         android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
         android:layout_weight="0.5"
         android:orientation="vertical" >
 
-        <ImageView
-            android:id="@+id/imageView1"
-            android:contentDescription="@string/splash_desc"
-            android:background="@color/blue"
+        <View
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
-            android:scaleType="fitEnd"
-            android:src="@drawable/splash" />
+            android:background="@color/blue"/>
         
     </LinearLayout>
     
     <LinearLayout
         android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="@+id/imageView1"
         android:layout_weight="1"
+        android:orientation="vertical" >
+
+        <ImageView
+            android:id="@+id/imageView1"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:background="@color/blue"
+            android:contentDescription="@string/splash_desc"
+            android:scaleType="fitEnd"
+            android:src="@drawable/splash" />
+
+    </LinearLayout>
+    
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="0dp"
+        android:layout_weight="0.5"
         android:orientation="vertical" >
         
         <View

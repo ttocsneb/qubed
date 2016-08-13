@@ -5,6 +5,7 @@ V0.3.0
 
 ##### Bugfixes
  - game crashes while loading after closing the app with the back button. (#1)
+ - some devices incorrectly display the splash screen.
 
 V0.2
 ---
