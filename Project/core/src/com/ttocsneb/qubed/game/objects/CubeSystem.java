@@ -195,12 +195,12 @@ public class CubeSystem extends EntitySystem implements ContactListener, com.tto
 		cubeComp.color = Global.selectColor();
 		// Add a health boos powerup 3/10 of the time.
 		if (MathUtils.randomBoolean(0.30f)) {
-			cubeComp.powerup = new HealthPowerup(cubeComp, MathUtils.random(
+			cubeComp.powerup = new HealthPowerup(cubeComp, game.powerup, MathUtils.random(
 					0.5f, 2f), game.player);
 			game.powerup.addPowerup(cubeComp.powerup);
 		} else if(MathUtils.randomBoolean(0.143f)) {
 			//The actual probability is 10% because (1-30%) * (14.3%) = 10%
-			cubeComp.powerup = new SlowPowerup(cubeComp, MathUtils.random(4f, 16f), game);
+			cubeComp.powerup = new SlowPowerup(cubeComp, game.powerup, MathUtils.random(4f, 16f), game);
 			game.powerup.addPowerup(cubeComp.powerup);
 		}
 

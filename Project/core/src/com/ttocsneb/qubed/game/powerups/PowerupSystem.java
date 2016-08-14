@@ -18,6 +18,8 @@ public class PowerupSystem extends EntitySystem {
 	private GameScreen game;
 
 	private Array<Powerup> objects;
+	
+	private Powerup active;
 
 	public PowerupSystem(GameScreen game) {
 		this.game = game;
@@ -25,25 +27,12 @@ public class PowerupSystem extends EntitySystem {
 	}
 
 	/**
-	 * Get the Combined color of all active powerups.
+	 * Get the color of the active powerups.
 	 * @return Color
 	 */
 	public Color getColor() {
-		//Start out with a white color
-		Color c = new Color(0, 0, 0, 1);
-		boolean active = false;
 		
-		//Go through each powerup and check if it is active.
-		for(Powerup p : objects) {
-			if(p.isActive()) {
-				//If it is multiply the current color by the powerup's color.
-				c = c.add(p.getColor());
-				active = true;
-			}
-		}
-		
-		//If at least one powerup is active return the color, if not, return black.
-		return active ? c : Color.BLACK;
+		return (active != null && active.isActive()) ? active.getColor() : Color.BLACK;
 	}
 	
 	/**
@@ -60,19 +49,17 @@ public class PowerupSystem extends EntitySystem {
 	public void update(float deltaTime) {
 		game.batch.setColor(Color.WHITE);
 		TextureRegion region;
+		
+		//check if the active powerup is active
+		if(active != null && active.isActive()) {
+			//start the powerup if it hasn't already started yet.
+			if(!active.hasStarted()) active.begin();
+			//update the powerup.
+			active.refresh(deltaTime);
+		}
 
 		// Go through each powerup, and process it.
 		for (Powerup powerup : objects) {
-
-			// Run the powerup, if it is active.
-			if (powerup.isActive()) {
-				// start the powerup.
-				if (!powerup.hasStarted()) powerup.begin();
-
-				powerup.refresh(deltaTime);
-
-				
-			}
 			
 			// stop the powerup, and remove it from existance.
 			if (powerup.isFinished()) {
@@ -101,6 +88,21 @@ public class PowerupSystem extends EntitySystem {
 			}
 
 		}
+	}
+	
+	/**
+	 * Activate a powerup
+	 * 
+	 * <br><br><b>Note</b>: this should only be called by {@link Powerup}.
+	 * 
+	 * @param powerup the powerup to activate
+	 * @return whether the powerup has been activated.
+	 */
+	public boolean activate(Powerup powerup) {
+		if(active != null && active.isActive())
+			return false;
+		active = powerup;
+		return true;
 	}
 
 }

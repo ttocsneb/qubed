@@ -25,9 +25,9 @@ public class SlowPowerup extends Powerup {
 	 * @param time The time the powerup will be active.
 	 * @param gamescreen
 	 */
-	public SlowPowerup(GameObject object, float time,
+	public SlowPowerup(GameObject object, PowerupSystem system, float time,
 			GameScreen gamescreen) {
-		super(object, Global.assets.textures.slowPowerup, time*SPEED);
+		super(object, system, Global.assets.textures.slowPowerup, time*SPEED);
 		this.time = time*SPEED;
 		gameScreen = gamescreen;
 

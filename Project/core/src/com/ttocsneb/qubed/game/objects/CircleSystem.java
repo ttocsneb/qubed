@@ -232,12 +232,12 @@ public class CircleSystem extends EntitySystem implements ContactListener, Spawn
 		circComp.color = Global.selectColor();
 		// Add a health boos powerup 3/10 of the time.
 		if (MathUtils.randomBoolean(0.30f)) {
-			circComp.powerup = new HealthPowerup(circComp, MathUtils.random(
+			circComp.powerup = new HealthPowerup(circComp, game.powerup, MathUtils.random(
 					0.5f, 2f), game.player);
 			game.powerup.addPowerup(circComp.powerup);
 		} else if(MathUtils.randomBoolean(0.143f)) {
 			//The actual probability is 10% because (1-30%) * (14.3%) = 10%
-			circComp.powerup = new SlowPowerup(circComp, MathUtils.random(4f, 16f), game);
+			circComp.powerup = new SlowPowerup(circComp, game.powerup, MathUtils.random(4f, 16f), game);
 			game.powerup.addPowerup(circComp.powerup);
 		}
 		addCircle(circComp);		

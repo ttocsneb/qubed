@@ -20,17 +20,22 @@ public abstract class Powerup {
 	private final float TIME;
 
 	public final GameObject object;
+	
+	public final PowerupSystem system;
 
 	/**
 	 * Create a new powerup.
 	 * 
 	 * @param object
+	 * @param system the PowerUpSystem this belongs to.
 	 * @param icon
 	 * @param time
 	 */
-	public Powerup(GameObject object, TextureRegion icon, float time) {
+	public Powerup(GameObject object, PowerupSystem system, TextureRegion icon, float time) {
 		this.icon = icon;
 
+		this.system = system;
+		
 		this.time = time;
 		TIME = time;
 
@@ -55,7 +60,10 @@ public abstract class Powerup {
 	 * Activate the powerup.
 	 */
 	public void activate() {
-		active = true;
+		//activate the powerup
+		if(system.activate(this)) {
+			active = true;
+		}
 	}
 
 	/**

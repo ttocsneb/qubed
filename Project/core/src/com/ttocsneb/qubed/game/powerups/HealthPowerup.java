@@ -10,8 +10,8 @@ public class HealthPowerup extends Powerup {
 
 	private PlayerSystem player;
 	
-	public HealthPowerup(GameObject object, float time, PlayerSystem player) {
-		super(object, Global.assets.textures.healthPowerup, time);
+	public HealthPowerup(GameObject object, PowerupSystem system, float time, PlayerSystem player) {
+		super(object, system, Global.assets.textures.healthPowerup, time);
 		
 		this.player = player;
 	}
