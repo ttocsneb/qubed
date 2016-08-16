@@ -39,7 +39,10 @@ public class PlayerSystem extends EntitySystem implements ContactListener {
 	private static final float COOLDOWN = 0.5f;
 	private static final float DELAY = 0.5f;
 	private static final float BULLETSIZE = 0.1f;
+	private static final float REGENRATE = 0.05f;
 
+	public float RegenMultiplier = 1f;
+	
 	private GameScreen game;
 
 	/** The Wanted rotation */
@@ -187,6 +190,8 @@ public class PlayerSystem extends EntitySystem implements ContactListener {
 	public void update(float delta) {
 		//Compensate the slow downs from slowmotion powerups.
 		delta /= game.speed;
+		
+		damage(-(REGENRATE*RegenMultiplier*delta));
 		
 		body.setTransform(body.getPosition(), (360 - rotation)
 				* MathUtils.degreesToRadians);
