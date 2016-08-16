@@ -36,6 +36,14 @@ public class PowerupSystem extends EntitySystem {
 	}
 	
 	/**
+	 * Get the active Texture icon.
+	 * @return texture
+	 */
+	public TextureRegion getTexture() {
+		return (active != null && active.isActive()) ? active.getTexture() : null;
+	}
+	
+	/**
 	 * Add a powerup to the game.
 	 * 
 	 * @param powerup
@@ -56,6 +64,9 @@ public class PowerupSystem extends EntitySystem {
 			if(!active.hasStarted()) active.begin();
 			//update the powerup.
 			active.refresh(deltaTime);
+			
+			region = active.getTexture();
+			
 		}
 
 		// Go through each powerup, and process it.

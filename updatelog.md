@@ -3,6 +3,7 @@ V0.3.0
 
  - Removed loading screen
  - Only one active powerup at a time
+ - Indicator that shows active powerup
 
 ##### Bugfixes
  - game crashes while loading after closing the app with the back button. (#1)

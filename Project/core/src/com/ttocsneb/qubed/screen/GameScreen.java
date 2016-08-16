@@ -15,6 +15,7 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.math.Interpolation;
@@ -123,7 +124,7 @@ public class GameScreen extends AbstractGameScreen implements InputProcessor {
 	@Override
 	public void show() {
 		debug = Gdx.app.getLogLevel() == Application.LOG_DEBUG;
-		
+
 		speed = 1f;
 		rotationSpeed = 1f;
 
@@ -299,8 +300,8 @@ public class GameScreen extends AbstractGameScreen implements InputProcessor {
 		spawner.update(delta, difficulty);
 		if (spawner.isPatternComplete()) {
 			spawner.startPattern(Global.assets.patterns.all[MathUtils
-					.random(Global.assets.patterns.all.length - 1)],
-					MathUtils.random(5));
+					.random(Global.assets.patterns.all.length - 1)], MathUtils
+					.random(5));
 			difficulty += 0.25f;
 		}
 
@@ -425,16 +426,26 @@ public class GameScreen extends AbstractGameScreen implements InputProcessor {
 			smol.draw(batch, scoreLabel, 10, 1910);
 		}
 
+		// Draw the active powerup in the top right of the screen.
+		if (powerup.getTexture() != null) {
+			TextureRegion t = powerup.getTexture();
+			batch.draw(t.getTexture(), 888/* 1080-(128*1.5) */, 1728, 192, 192,
+					t.getRegionX(), t.getRegionY(), t.getRegionWidth(),
+					t.getRegionHeight(), false, false);
+
+		}
+
 		// //////////////////////////HUD BATCH/////////////////////////////
 		batch.end();
 
 	}
 
 	public Vector2 getPointer() {
-		Vector3 v3 = cam.unproject(new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0));
+		Vector3 v3 = cam.unproject(new Vector3(Gdx.input.getX(), Gdx.input
+				.getY(), 0));
 		return new Vector2(v3.x, v3.y);
 	}
-	
+
 	/**
 	 * Add to the current score.
 	 * 
@@ -477,9 +488,12 @@ public class GameScreen extends AbstractGameScreen implements InputProcessor {
 			ScreenTransition transition = ScreenTransitionSlide.init(0.5f,
 					ScreenTransitionSlide.RIGHT, false, Interpolation.pow2);
 			game.setScreen(new MenuScreen(game), transition);
-			if(!Global.Config.MUTE && Global.assets.sounds.slowMusic.isPlaying()) {
+			if (!Global.Config.MUTE
+					&& Global.assets.sounds.slowMusic.isPlaying()) {
 				Global.assets.sounds.slowMusic.pause();
-				Global.assets.sounds.music.setPosition(Global.assets.sounds.slowMusic.getPosition()/2f);
+				Global.assets.sounds.music
+						.setPosition(Global.assets.sounds.slowMusic
+								.getPosition() / 2f);
 				Global.assets.sounds.music.play();
 			}
 		}
