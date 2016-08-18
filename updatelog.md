@@ -5,6 +5,7 @@ V0.3.0
  - Only one active powerup at a time
  - Indicator that shows active powerup
  - Player regenerates on its own
+ - Player changes color as its health degenerates.
 
 ##### Bugfixes
  - game crashes while loading after closing the app with the back button. (#1)

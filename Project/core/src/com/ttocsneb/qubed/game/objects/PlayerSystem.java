@@ -40,6 +40,9 @@ public class PlayerSystem extends EntitySystem implements ContactListener {
 	private static final float DELAY = 0.5f;
 	private static final float BULLETSIZE = 0.1f;
 	private static final float REGENRATE = 0.05f;
+	
+	private Color color;
+	private Color toColor;
 
 	public float RegenMultiplier = 1f;
 	
@@ -84,6 +87,9 @@ public class PlayerSystem extends EntitySystem implements ContactListener {
 		initBody(gs.world);
 
 		difficulty = 1;
+		
+		color = new Color(Color.LIGHT_GRAY.mul(Color.CYAN));
+		toColor = new Color(Color.LIGHT_GRAY.mul(Color.CYAN));
 	}
 
 	/**
@@ -191,7 +197,11 @@ public class PlayerSystem extends EntitySystem implements ContactListener {
 		//Compensate the slow downs from slowmotion powerups.
 		delta /= game.speed;
 		
-		damage(-(REGENRATE*RegenMultiplier*delta));
+		
+		if(size < 1){
+			damage(-(REGENRATE*RegenMultiplier*delta));
+		}
+			
 		
 		body.setTransform(body.getPosition(), (360 - rotation)
 				* MathUtils.degreesToRadians);
@@ -211,9 +221,10 @@ public class PlayerSystem extends EntitySystem implements ContactListener {
 			game.shape.rectLine(new Vector2(0, 0), new Vector2(2203 * MathUtils.cosDeg(-90 - rotation),
 							2203 * MathUtils.sinDeg(-90 - rotation)), 0.01f);
 		}
+		
 
 		// Shoot if the player has tapped the screen.
-		if (size > BULLETSIZE && coolDown / difficulty <= 0
+		if (size-BULLETSIZE >= BULLETSIZE && coolDown / difficulty <= 0
 				&& Gdx.input.isTouched() && !touched) {
 
 			Gdx.input.vibrate(new long[]{0, 10, 10, 10, 10, 10, 10}, -1);
@@ -222,8 +233,8 @@ public class PlayerSystem extends EntitySystem implements ContactListener {
 			
 			float maxTime = (COOLDOWN+DELAY)/difficulty;
 			
-			delay = Math.max(maxTime-COOLDOWN, 0);
-			coolDown = Math.min(maxTime, COOLDOWN);
+			delay = maxTime-COOLDOWN;
+			coolDown = maxTime-COOLDOWN > 0 ? COOLDOWN : maxTime;
 			
 			BulletComponent c = new BulletComponent();
 
@@ -244,7 +255,7 @@ public class PlayerSystem extends EntitySystem implements ContactListener {
 				c.vely = MathUtils.cosDeg(rotation);
 				
 				light = new PointLight(game.lights, 512,
-						new Color(1, 1, 1, 0.25f).mul(Color.CYAN), 1, a.x + 0.05f
+						new Color(1, 1, 1, 0.25f).mul(color), 1, a.x + 0.05f
 								* MathUtils.sinDeg(rotation), a.y + 0.05f
 								* MathUtils.cosDeg(rotation));
 
@@ -265,7 +276,7 @@ public class PlayerSystem extends EntitySystem implements ContactListener {
 				c.vely = MathUtils.cosDeg(rotation + 120);
 				
 				light = new PointLight(game.lights, 512,
-						new Color(1, 1, 1, 0.25f).mul(Color.CYAN), 1, b.x + 0.05f
+						new Color(1, 1, 1, 0.25f).mul(color), 1, b.x + 0.05f
 								* MathUtils.sinDeg(rotation), b.y + 0.05f
 								* MathUtils.cosDeg(rotation));
 
@@ -282,7 +293,7 @@ public class PlayerSystem extends EntitySystem implements ContactListener {
 				c.vely = MathUtils.cosDeg(rotation - 120);
 
 				light = new PointLight(game.lights, 512,
-						new Color(1, 1, 1, 0.25f).mul(Color.CYAN), 1, this.c.x + 0.05f
+						new Color(1, 1, 1, 0.25f).mul(color), 1, this.c.x + 0.05f
 								* MathUtils.sinDeg(rotation), this.c.y + 0.05f
 								* MathUtils.cosDeg(rotation));
 				
@@ -290,9 +301,8 @@ public class PlayerSystem extends EntitySystem implements ContactListener {
 			}
 			
 			c.scale = BULLETSIZE;
-
+			c.color.set(color);
 			
-
 			game.bullet.addBullet(c);
 		} else if (!Gdx.input.isTouched() && touched) {
 			touched = false;
@@ -330,10 +340,20 @@ public class PlayerSystem extends EntitySystem implements ContactListener {
 		// ///////////////////////////////////////////////////////////
 
 		if (size > 0) {
-
+			if(size < 0.25f) {
+				toColor.set(Global.RED);
+			} else if(size < 0.33f) {
+				toColor.set(Global.ORANGE);
+			} else {
+				toColor.set(Color.LIGHT_GRAY.mul(Color.CYAN));
+			}
+			
+			color.lerp(toColor, delta/0.25f);
+			
+			game.shape.setColor(color);
+			
 			rotation = nlerp(delta * 7, rotation, torotation);
 
-			game.shape.setColor(Color.LIGHT_GRAY.mul(Color.CYAN));
 
 			if (coolDown <= 0) {
 
@@ -394,7 +414,7 @@ public class PlayerSystem extends EntitySystem implements ContactListener {
 					// it
 					// to make it smooth.
 					progress = 1 - coolDown / COOLDOWN / difficulty;
-					progress = Interpolation.pow2Out.apply(progress);
+					progress = Interpolation.fade.apply(progress);
 					progress *= BULLETSIZE;
 
 				}

@@ -7,7 +7,6 @@ import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.EntitySystem;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.utils.ImmutableArray;
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.BodyDef;
@@ -57,14 +56,12 @@ public class BulletSystem extends EntitySystem implements ContactListener {
 		//compensate for speed related powerups.
 		delta /= game.speed;
 		
-		
-		// Set the color to draw the bullets.
-		game.shape.setColor(Color.LIGHT_GRAY.mul(Color.CYAN));
-
 		// Loop through every bullet
 		for (Entity entity : entities) {
 			BulletComponent bullet = bc.get(entity);
-
+			
+			game.shape.setColor(bullet.color);
+			
 			// Update the bullet position. Note: I'm not sure why we do this.
 			bullet.position.x = bullet.body.getPosition().x;
 			bullet.position.y = bullet.body.getPosition().y;

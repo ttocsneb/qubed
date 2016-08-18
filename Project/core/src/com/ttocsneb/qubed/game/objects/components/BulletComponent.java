@@ -1,6 +1,7 @@
 package com.ttocsneb.qubed.game.objects.components;
 
 import com.badlogic.ashley.core.Component;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.ttocsneb.qubed.game.objects.GameObject;
@@ -25,8 +26,11 @@ public class BulletComponent implements Component, GameObject {
 
 	public float scale = 1;
 	
+	public Color color;
+	
 	public BulletComponent() {
 		position = new Vector2();
+		color = new Color(Color.BLACK);
 	}
 	
 	
