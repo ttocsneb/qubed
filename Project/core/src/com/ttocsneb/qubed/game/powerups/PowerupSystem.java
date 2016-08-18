@@ -47,10 +47,13 @@ public class PowerupSystem extends EntitySystem {
 	 * Add a powerup to the game.
 	 * 
 	 * @param powerup
+	 * @return true if successful
 	 */
-	public void addPowerup(Powerup powerup) {
+	public boolean addPowerup(Powerup powerup) {
+		if(powerup.getObject() == null) return false;
 		Gdx.app.debug("PowerupSystem", "Added powerup! size is now " + objects.size);
 		objects.add(powerup);
+		return true;
 	}
 
 	@Override
@@ -82,17 +85,17 @@ public class PowerupSystem extends EntitySystem {
 			}
 
 			// Draw the powerup icon if the parent object hasn't died yet.
-			if (powerup.object != null) {
+			if (powerup.getObject() != null) {
 				region = powerup.getTexture();
 
 				game.batch.draw(
 						region.getTexture(),
-						powerup.object.getPosition().x
-								+ powerup.object.getCenter().x - 0.5f,
-						powerup.object.getPosition().y
-								+ powerup.object.getCenter().y - 0.5f, 0.5f,
-						0.5f, 1, 1, powerup.object.getSize(),
-						powerup.object.getSize(), powerup.object.getRotation(),
+						powerup.getObject().getPosition().x
+								+ powerup.getObject().getCenter().x - 0.5f,
+						powerup.getObject().getPosition().y
+								+ powerup.getObject().getCenter().y - 0.5f, 0.5f,
+						0.5f, 1, 1, powerup.getObject().getSize(),
+						powerup.getObject().getSize(), powerup.getObject().getRotation(),
 						region.getRegionX(), region.getRegionY(),
 						region.getRegionWidth(), region.getRegionHeight(),
 						false, false);

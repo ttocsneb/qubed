@@ -33,7 +33,10 @@ import com.ttocsneb.qubed.game.objects.CircleSystem;
 import com.ttocsneb.qubed.game.objects.CubeSystem;
 import com.ttocsneb.qubed.game.objects.ParticleSystem;
 import com.ttocsneb.qubed.game.objects.PlayerSystem;
+import com.ttocsneb.qubed.game.powerups.HealthPowerup;
+import com.ttocsneb.qubed.game.powerups.Powerup;
 import com.ttocsneb.qubed.game.powerups.PowerupSystem;
+import com.ttocsneb.qubed.game.powerups.SlowPowerup;
 import com.ttocsneb.qubed.game.spawn.SpawnManager;
 import com.ttocsneb.qubed.game.spawn.json.SpawnObject;
 import com.ttocsneb.qubed.game.spawn.json.SpawnPattern;
@@ -64,6 +67,8 @@ public class GameScreen extends AbstractGameScreen implements InputProcessor {
 	public BulletSystem bullet;
 	public ParticleSystem particle;
 	public PowerupSystem powerup;
+
+	public Powerup spawnPowerup;
 
 	// The contact manager simplifies Box2D contact events.
 	ContactManager contactManager;
@@ -368,6 +373,11 @@ public class GameScreen extends AbstractGameScreen implements InputProcessor {
 		// ///////////////////////////GAME BATCH///////////////////////////
 		batch.end();
 
+		//Only attempt to spawn a powerup ~once every second.
+		if (powerup.getTexture() == null && MathUtils.randomBoolean(0.01667f)) {
+			spawnPowerup();
+		}
+
 		// Update the lighting system.
 		lights.setCombinedMatrix(cam);
 		lights.updateAndRender();
@@ -438,6 +448,21 @@ public class GameScreen extends AbstractGameScreen implements InputProcessor {
 		// //////////////////////////HUD BATCH/////////////////////////////
 		batch.end();
 
+	}
+
+	/**
+	 * Attempt to spawn a powerup.
+	 */
+	private void spawnPowerup() {
+		if (MathUtils.randomBoolean(0.10f)) {
+			// 10% chance of a health powerup to spawn a health powerup
+			spawnPowerup = new HealthPowerup(powerup,
+					MathUtils.random(0.5f, 2f), player);
+		} else if (MathUtils.randomBoolean(0.05556f)) {// Slowmo powerup
+			// The actual probability is 5% because (1-10%) * (5.556%) = 5%
+			spawnPowerup = new SlowPowerup(powerup, MathUtils.random(4f, 16f),
+					this);
+		}
 	}
 
 	public Vector2 getPointer() {

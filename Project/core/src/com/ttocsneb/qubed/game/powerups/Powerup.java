@@ -19,7 +19,7 @@ public abstract class Powerup {
 	private float time;
 	private final float TIME;
 
-	public final GameObject object;
+	private GameObject object;
 	
 	public final PowerupSystem system;
 
@@ -31,7 +31,7 @@ public abstract class Powerup {
 	 * @param icon
 	 * @param time
 	 */
-	public Powerup(GameObject object, PowerupSystem system, TextureRegion icon, float time) {
+	public Powerup( PowerupSystem system, TextureRegion icon, float time) {
 		this.icon = icon;
 
 		this.system = system;
@@ -39,8 +39,9 @@ public abstract class Powerup {
 		this.time = time;
 		TIME = time;
 
-		this.object = object;
 	}
+	
+	
 
 	/**
 	 * @return the texture to draw the powerup.
@@ -153,5 +154,14 @@ public abstract class Powerup {
 	 * @return Color
 	 */
 	public abstract Color getColor();
+
+	
+	public GameObject getObject() {
+		return object;
+	}
+	
+	public void setObject(GameObject object) {
+		this.object = object;
+	}
 
 }

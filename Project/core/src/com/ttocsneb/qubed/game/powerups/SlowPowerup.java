@@ -2,7 +2,6 @@ package com.ttocsneb.qubed.game.powerups;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Interpolation;
-import com.ttocsneb.qubed.game.objects.GameObject;
 import com.ttocsneb.qubed.screen.GameScreen;
 import com.ttocsneb.qubed.util.Global;
 
@@ -25,9 +24,9 @@ public class SlowPowerup extends Powerup {
 	 * @param time The time the powerup will be active.
 	 * @param gamescreen
 	 */
-	public SlowPowerup(GameObject object, PowerupSystem system, float time,
+	public SlowPowerup(PowerupSystem system, float time,
 			GameScreen gamescreen) {
-		super(object, system, Global.assets.textures.slowPowerup, time*SPEED);
+		super(system, Global.assets.textures.slowPowerup, time*SPEED);
 		this.time = time*SPEED;
 		gameScreen = gamescreen;
 

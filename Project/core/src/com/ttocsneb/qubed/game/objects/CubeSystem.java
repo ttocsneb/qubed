@@ -17,8 +17,6 @@ import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.ttocsneb.qubed.game.contact.ContactListener;
 import com.ttocsneb.qubed.game.objects.components.BulletComponent;
 import com.ttocsneb.qubed.game.objects.components.CubeComponent;
-import com.ttocsneb.qubed.game.powerups.HealthPowerup;
-import com.ttocsneb.qubed.game.powerups.SlowPowerup;
 import com.ttocsneb.qubed.screen.GameScreen;
 import com.ttocsneb.qubed.util.Global;
 
@@ -193,17 +191,18 @@ public class CubeSystem extends EntitySystem implements ContactListener, com.tto
 		cubeComp.velocity = velocity;
 		cubeComp.scale = scale;
 		cubeComp.color = Global.selectColor();
-		// Add a health boos powerup 3/10 of the time.
-		if (MathUtils.randomBoolean(0.30f)) {
-			cubeComp.powerup = new HealthPowerup(cubeComp, game.powerup, MathUtils.random(
-					0.5f, 2f), game.player);
-			game.powerup.addPowerup(cubeComp.powerup);
-		} else if(MathUtils.randomBoolean(0.143f)) {
-			//The actual probability is 10% because (1-30%) * (14.3%) = 10%
-			cubeComp.powerup = new SlowPowerup(cubeComp, game.powerup, MathUtils.random(4f, 16f), game);
+		
+		if(game.spawnPowerup != null){
+			//assign the powerup to the cubeComp
+			cubeComp.powerup = game.spawnPowerup;
+			//remove the powerup from the gamescreen
+			game.spawnPowerup = null;
+			//assign the cubeComp to the powerup
+			cubeComp.powerup.setObject(cubeComp);
+			//activate the powerup
 			game.powerup.addPowerup(cubeComp.powerup);
 		}
-
+		
 		addCube(cubeComp);
 	}
 

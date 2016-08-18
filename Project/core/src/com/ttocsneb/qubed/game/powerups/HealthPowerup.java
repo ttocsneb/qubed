@@ -1,7 +1,6 @@
 package com.ttocsneb.qubed.game.powerups;
 
 import com.badlogic.gdx.graphics.Color;
-import com.ttocsneb.qubed.game.objects.GameObject;
 import com.ttocsneb.qubed.game.objects.PlayerSystem;
 import com.ttocsneb.qubed.util.Global;
 
@@ -10,8 +9,8 @@ public class HealthPowerup extends Powerup {
 
 	private PlayerSystem player;
 	
-	public HealthPowerup(GameObject object, PowerupSystem system, float time, PlayerSystem player) {
-		super(object, system, Global.assets.textures.healthPowerup, time);
+	public HealthPowerup(PowerupSystem system, float time, PlayerSystem player) {
+		super(system, Global.assets.textures.healthPowerup, time);
 		
 		this.player = player;
 	}

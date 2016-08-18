@@ -18,8 +18,6 @@ import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.ttocsneb.qubed.game.contact.ContactListener;
 import com.ttocsneb.qubed.game.objects.components.BulletComponent;
 import com.ttocsneb.qubed.game.objects.components.CircleComponent;
-import com.ttocsneb.qubed.game.powerups.HealthPowerup;
-import com.ttocsneb.qubed.game.powerups.SlowPowerup;
 import com.ttocsneb.qubed.game.spawn.Spawn;
 import com.ttocsneb.qubed.screen.GameScreen;
 import com.ttocsneb.qubed.util.Global;
@@ -230,16 +228,18 @@ public class CircleSystem extends EntitySystem implements ContactListener, Spawn
 		circComp.velocity = velocity;
 		circComp.scale = scale;
 		circComp.color = Global.selectColor();
-		// Add a health boos powerup 3/10 of the time.
-		if (MathUtils.randomBoolean(0.30f)) {
-			circComp.powerup = new HealthPowerup(circComp, game.powerup, MathUtils.random(
-					0.5f, 2f), game.player);
-			game.powerup.addPowerup(circComp.powerup);
-		} else if(MathUtils.randomBoolean(0.143f)) {
-			//The actual probability is 10% because (1-30%) * (14.3%) = 10%
-			circComp.powerup = new SlowPowerup(circComp, game.powerup, MathUtils.random(4f, 16f), game);
+		
+		if(game.spawnPowerup != null){
+			//assign the powerup to the circComp
+			circComp.powerup = game.spawnPowerup;
+			//remove the powerup from the gamescreen
+			game.spawnPowerup = null;
+			//assign the circComp to the powerup
+			circComp.powerup.setObject(circComp);
+			//activate the powerup
 			game.powerup.addPowerup(circComp.powerup);
 		}
+		
 		addCircle(circComp);		
 	}
 
