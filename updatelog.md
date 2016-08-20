@@ -5,10 +5,12 @@ V0.3.0
  - Only one active powerup at a time
  - Indicator that shows active powerup
  - Player regenerates on its own
- - Player changes color as its health degenerates.
+ - Player changes color as its health degenerates
+ - Player can shoot from any point at the same time
+ - Various other changes
 
 ##### Bugfixes
- - game crashes while loading after closing the app with the back button. (#1)
+ - game crashes while loading after closing the app with the back button. ([#1](https://github.com/ttocsneb/qubed/issues/1))
  - some devices incorrectly display the splash screen.
 
 V0.2

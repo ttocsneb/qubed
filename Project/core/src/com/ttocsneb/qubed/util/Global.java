@@ -5,6 +5,7 @@ import com.badlogic.gdx.Preferences;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.math.EarClippingTriangulator;
 import com.badlogic.gdx.math.MathUtils;
 
 /**
@@ -41,7 +42,45 @@ public class Global  {
 		if(shape == null) shape = new ShapeRenderer();
 		if(assets == null) assets = new Assets();
 	}
+	
+	private static EarClippingTriangulator ear = new EarClippingTriangulator();
+	
+	/**
+	 * Fill a polygon into the {@link #shape} {@link ShapeRenderer}.
+	 * @param verts pairs of vertices
+	 * @return true if the polygon was successfully drawn.
+	 */
+	public static boolean fillPoly(float...verts) {
+		//return false when the shapeRenderer is not active, or the verticies are not even.
+		if(!shape.isDrawing() && (verts.length & 1) == 1)
+			return false;
 
+		//Find the indices to draw triangles without holes
+		short[] v = ear.computeTriangles(verts, 0, verts.length).items;
+
+		for(int i=0; i<v.length; i+=3) {
+			//The size of the indice array may be bigger than the data inside.  exit the loop if there is no more data.
+			if(v[i]==v[i+1] && v[i]==v[i+2]) {
+				//Gdx.app.log("Global", "Finish");
+				break;
+			}
+			//Gdx.app.log("Global", "v: " + verts[v[i]*2] + "," + verts[v[i]*2+1] + "," + verts[v[i+1]*2] + "," + verts[v[i+1]*2+1] + "," + verts[v[i+2]*2] + "," + verts[v[i+2]*2+1]);
+			
+			
+			//Draw the triangle
+			shape.triangle(verts[v[i]*2], verts[v[i]*2+1],
+					verts[v[i+1]*2], verts[v[i+1]*2+1],
+					verts[v[i+2]*2], verts[v[i+2]*2+1]);
+			
+			v[i] = 0;
+			v[i+1] = 0;
+			v[i+2] = 0;
+		}
+		
+		
+		return true;
+	}
+	
 	/**
 	 * Performs a linear interpolation
 	 * 

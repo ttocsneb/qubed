@@ -36,16 +36,15 @@ public class PlayerSystem extends EntitySystem implements ContactListener {
 
 	private ParticleEffectPool triangleEffect;
 
-	private static final float COOLDOWN = 0.5f;
-	private static final float DELAY = 0.5f;
+	private static final float COOLDOWN = 0.33f;
 	private static final float BULLETSIZE = 0.1f;
 	private static final float REGENRATE = 0.05f;
-	
+
 	private Color color;
 	private Color toColor;
 
 	public float RegenMultiplier = 1f;
-	
+
 	private GameScreen game;
 
 	/** The Wanted rotation */
@@ -57,17 +56,18 @@ public class PlayerSystem extends EntitySystem implements ContactListener {
 	/** The desired size of the player */
 	private float health;
 	/** Time it takes to regenerate the missing corner from shooting */
-	private float coolDown = 0;
-	/** Time before the player regenerates its missing corner after shooting. */
-	private float delay = DELAY;
-	/** Used for touch events. */
-	private boolean touched = true;
-	/** which orientation the shoot animation should be in degrees */
-	private int orient = 0;
+	private float coolDownA, coolDownB, coolDownC;
 
-	private Vector2 a, b, c, d, e;
+	private Vector2 a, b, c, d, e, f, g, h, i;
 	private Body body;
 	private Fixture fixture;
+
+	/**
+	 * The point of the triangle which is shot. <br>
+	 * <br>
+	 * The first 3 bits are for each point.
+	 */
+	private byte shootpoint = 0;
 
 	private PointLight light;
 
@@ -83,11 +83,13 @@ public class PlayerSystem extends EntitySystem implements ContactListener {
 		c = new Vector2();
 		d = new Vector2();
 		e = new Vector2();
+		f = new Vector2();
+		g = new Vector2();
+		h = new Vector2();
+		i = new Vector2();
 
 		initBody(gs.world);
 
-		difficulty = 1;
-		
 		color = new Color(Color.LIGHT_GRAY.mul(Color.CYAN));
 		toColor = new Color(Color.LIGHT_GRAY.mul(Color.CYAN));
 	}
@@ -144,6 +146,8 @@ public class PlayerSystem extends EntitySystem implements ContactListener {
 		fdef.density = 1f;
 		fdef.restitution = 0.2f;
 
+		fdef.filter.categoryBits = 2;
+		
 		PolygonShape shape = new PolygonShape();
 
 		// Set the points of the shape.
@@ -186,23 +190,109 @@ public class PlayerSystem extends EntitySystem implements ContactListener {
 
 	}
 
-	private float difficulty;
+	public void shoot(int pointer) {
+		BulletComponent c = new BulletComponent();
 
-	public void setDifficulty(float diff) {
-		difficulty = diff;
+		c.scale = BULLETSIZE;
+		c.color.set(color);
+
+		// decide which point to shoot from.
+		if (coolDownA <= 0
+				&& inTriange(game.getPointer(pointer), new Vector2(0, 0),
+						new Vector2(2203 * MathUtils.cosDeg(150 - rotation),
+								2203 * MathUtils.sinDeg(150 - rotation)),
+						new Vector2(2203 * MathUtils.cosDeg(30 - rotation),
+								2203 * MathUtils.sinDeg(30 - rotation)))) {
+			Gdx.app.debug("PlayerSystem:Update:Shoot",
+					"Normal shoot orientation.");
+			c.position.x = this.a.x;
+			c.position.y = this.a.y;
+
+			c.rotation = rotation;
+
+			c.velx = MathUtils.sinDeg(rotation);
+			c.vely = MathUtils.cosDeg(rotation);
+
+			/*
+			 * light = new PointLight(game.lights, 512, new Color(1, 1, 1,
+			 * 0.25f).mul(color), 1, a.x + 0.05f MathUtils.sinDeg(rotation), a.y
+			 * + 0.05f MathUtils.cosDeg(rotation));
+			 */
+
+			game.bullet.addBullet(c);
+			coolDownA = COOLDOWN;
+
+			shootpoint = (byte) (shootpoint | 1);
+		} else if (coolDownB <= 0
+				&& inTriange(game.getPointer(pointer), new Vector2(0, 0),
+						new Vector2(2203 * MathUtils.cosDeg(-90 - rotation),
+								2203 * MathUtils.sinDeg(-90 - rotation)),
+						new Vector2(2203 * MathUtils.cosDeg(30 - rotation),
+								2203 * MathUtils.sinDeg(30 - rotation)))) {
+			Gdx.app.debug("PlayerSystem:Update:Shoot",
+					"Right shoot orientation.");
+			c.position.x = this.b.x;
+			c.position.y = this.b.y;
+
+			c.rotation = rotation + 120;
+
+			c.velx = MathUtils.sinDeg(rotation + 120);
+			c.vely = MathUtils.cosDeg(rotation + 120);
+
+			/*
+			 * light = new PointLight(game.lights, 512, new Color(1, 1, 1,
+			 * 0.25f).mul(color), 1, b.x + 0.05f MathUtils.sinDeg(rotation), b.y
+			 * + 0.05f MathUtils.cosDeg(rotation));
+			 */
+
+			game.bullet.addBullet(c);
+			coolDownB = COOLDOWN;
+
+			shootpoint = (byte) (shootpoint | 2);
+		} else if (coolDownC <= 0
+				&& inTriange(game.getPointer(pointer), new Vector2(0, 0),
+						new Vector2(2203 * MathUtils.cosDeg(150 - rotation),
+								2203 * MathUtils.sinDeg(150 - rotation)),
+						new Vector2(2203 * MathUtils.cosDeg(-90 - rotation),
+								2203 * MathUtils.sinDeg(-90 - rotation)))) {
+			Gdx.app.debug("PlayerSystem:Update:Shoot",
+					"Left shoot orientation.");
+			c.position.x = this.c.x;
+			c.position.y = this.c.y;
+
+			c.rotation = rotation - 120;
+
+			c.velx = MathUtils.sinDeg(rotation - 120);
+			c.vely = MathUtils.cosDeg(rotation - 120);
+
+			/*
+			 * light = new PointLight(game.lights, 512, new Color(1, 1, 1,
+			 * 0.25f).mul(color), 1, this.c.x + 0.05f
+			 * MathUtils.sinDeg(rotation), this.c.y + 0.05f
+			 * MathUtils.cosDeg(rotation));
+			 */
+
+			game.bullet.addBullet(c);
+			coolDownC = COOLDOWN;
+
+			shootpoint = (byte) (shootpoint | 4);
+		} else {
+			return;
+		}
+
+		Gdx.input.vibrate(new long[] { 0, 10, 10, 10, 10, 10, 10 }, -1);
+
 	}
 
 	@Override
 	public void update(float delta) {
-		//Compensate the slow downs from slowmotion powerups.
+		// Compensate the slow downs from slowmotion powerups.
 		delta /= game.speed;
-		
-		
-		if(size < 1){
-			damage(-(REGENRATE*RegenMultiplier*delta));
+
+		if (size < 1) {
+			damage(-(REGENRATE * RegenMultiplier * delta));
 		}
-			
-		
+
 		body.setTransform(body.getPosition(), (360 - rotation)
 				* MathUtils.degreesToRadians);
 
@@ -212,100 +302,27 @@ public class PlayerSystem extends EntitySystem implements ContactListener {
 		//
 		// ///////////////////////////////////////////////////////////
 
-		if(game.debug) {
+		if (game.debug) {
 			game.shape.setColor(Color.BLACK);
-			game.shape.rectLine(new Vector2(0, 0), new Vector2(2203 * MathUtils.cosDeg(150 - rotation),
+			game.shape.rectLine(new Vector2(0, 0),
+					new Vector2(2203 * MathUtils.cosDeg(150 - rotation),
 							2203 * MathUtils.sinDeg(150 - rotation)), 0.01f);
-			game.shape.rectLine(new Vector2(0, 0), new Vector2(2203 * MathUtils.cosDeg(30 - rotation),
+			game.shape.rectLine(new Vector2(0, 0),
+					new Vector2(2203 * MathUtils.cosDeg(30 - rotation),
 							2203 * MathUtils.sinDeg(30 - rotation)), 0.01f);
-			game.shape.rectLine(new Vector2(0, 0), new Vector2(2203 * MathUtils.cosDeg(-90 - rotation),
+			game.shape.rectLine(new Vector2(0, 0),
+					new Vector2(2203 * MathUtils.cosDeg(-90 - rotation),
 							2203 * MathUtils.sinDeg(-90 - rotation)), 0.01f);
 		}
-		
 
 		// Shoot if the player has tapped the screen.
-		if (size-BULLETSIZE >= BULLETSIZE && coolDown / difficulty <= 0
-				&& Gdx.input.isTouched() && !touched) {
+		if (size - BULLETSIZE >= BULLETSIZE && Gdx.input.isTouched()) {
 
-			Gdx.input.vibrate(new long[]{0, 10, 10, 10, 10, 10, 10}, -1);
-			
-			touched = true;
-			
-			float maxTime = (COOLDOWN+DELAY)/difficulty;
-			
-			delay = maxTime-COOLDOWN;
-			coolDown = maxTime-COOLDOWN > 0 ? COOLDOWN : maxTime;
-			
-			BulletComponent c = new BulletComponent();
-
-			//decide which point to shoot from.
-			if (inTriange(game.getPointer(), new Vector2(0, 0),
-					new Vector2(2203 * MathUtils.cosDeg(150 - rotation),
-							2203 * MathUtils.sinDeg(150 - rotation)),
-					new Vector2(2203 * MathUtils.cosDeg(30 - rotation),
-							2203 * MathUtils.sinDeg(30 - rotation)))) {
-				Gdx.app.debug("PlayerSystem:Update:Shoot",
-						"Normal shoot orientation.");
-				c.position.x = a.x;
-				c.position.y = a.y;
-
-				c.rotation = rotation;
-
-				c.velx = MathUtils.sinDeg(rotation);
-				c.vely = MathUtils.cosDeg(rotation);
-				
-				light = new PointLight(game.lights, 512,
-						new Color(1, 1, 1, 0.25f).mul(color), 1, a.x + 0.05f
-								* MathUtils.sinDeg(rotation), a.y + 0.05f
-								* MathUtils.cosDeg(rotation));
-
-				orient = 0;
-			} else if (inTriange(game.getPointer(), new Vector2(0, 0),
-					new Vector2(2203 * MathUtils.cosDeg(-90 - rotation),
-							2203 * MathUtils.sinDeg(-90 - rotation)),
-					new Vector2(2203 * MathUtils.cosDeg(30 - rotation),
-							2203 * MathUtils.sinDeg(30 - rotation)))) {
-				Gdx.app.debug("PlayerSystem:Update:Shoot",
-						"Right shoot orientation.");
-				c.position.x = b.x;
-				c.position.y = b.y;
-
-				c.rotation = rotation + 120;
-
-				c.velx = MathUtils.sinDeg(rotation + 120);
-				c.vely = MathUtils.cosDeg(rotation + 120);
-				
-				light = new PointLight(game.lights, 512,
-						new Color(1, 1, 1, 0.25f).mul(color), 1, b.x + 0.05f
-								* MathUtils.sinDeg(rotation), b.y + 0.05f
-								* MathUtils.cosDeg(rotation));
-
-				orient = -120;
-			} else {
-				Gdx.app.debug("PlayerSystem:Update:Shoot",
-						"Left shoot orientation.");
-				c.position.x = this.c.x;
-				c.position.y = this.c.y;
-
-				c.rotation = rotation - 120;
-
-				c.velx = MathUtils.sinDeg(rotation - 120);
-				c.vely = MathUtils.cosDeg(rotation - 120);
-
-				light = new PointLight(game.lights, 512,
-						new Color(1, 1, 1, 0.25f).mul(color), 1, this.c.x + 0.05f
-								* MathUtils.sinDeg(rotation), this.c.y + 0.05f
-								* MathUtils.cosDeg(rotation));
-				
-				orient = +120;
+			for (int i = 0; i < 3; i++) {
+				if (Gdx.input.isTouched(i))
+					shoot(i);
 			}
-			
-			c.scale = BULLETSIZE;
-			c.color.set(color);
-			
-			game.bullet.addBullet(c);
-		} else if (!Gdx.input.isTouched() && touched) {
-			touched = false;
+
 		}
 
 		if (light != null) {
@@ -318,12 +335,12 @@ public class PlayerSystem extends EntitySystem implements ContactListener {
 		}
 
 		// Health
-		//Shrink to nothing when the player can no longer shoot.
-		if(health < BULLETSIZE) {
+		// Shrink to nothing when the player can no longer shoot.
+		if (health < BULLETSIZE) {
 			health = 0;
 		}
 		if (size != health) {
-			
+
 			size = lerp(delta * 5, size, health);
 
 			if (Math.abs(size - health) < 0.01f) {
@@ -340,22 +357,21 @@ public class PlayerSystem extends EntitySystem implements ContactListener {
 		// ///////////////////////////////////////////////////////////
 
 		if (size > 0) {
-			if(size < 0.25f) {
+			if (size - BULLETSIZE < BULLETSIZE) {
 				toColor.set(Global.RED);
-			} else if(size < 0.33f) {
+			} else if (size < BULLETSIZE * 3) {
 				toColor.set(Global.ORANGE);
 			} else {
 				toColor.set(Color.LIGHT_GRAY.mul(Color.CYAN));
 			}
-			
-			color.lerp(toColor, delta/0.25f);
-			
+
+			color.lerp(toColor, delta / 0.1f);
+
 			game.shape.setColor(color);
-			
+
 			rotation = nlerp(delta * 7, rotation, torotation);
 
-
-			if (coolDown <= 0) {
+			if (coolDownA <= 0 && coolDownB <= 0 && coolDownC <= 0) {
 
 				float tsize = size / 2f;
 
@@ -370,74 +386,142 @@ public class PlayerSystem extends EntitySystem implements ContactListener {
 				game.shape.triangle(a.x, a.y, c.x, c.y, b.x, b.y);
 			} else {
 
-				/**
-				 * Temporary rotation: used to render the trapezoid at different
-				 * orientations
-				 */
-				float trotation = rotation - orient;
 				// other points.
 
 				// calculate the modifications to the triangle
-				float progress = 0;
+				float progressA = 0;
+				float progressB = 0;
+				float progressC = 0;
 
-				// wait until the delay has passed before making modifications.
-				if (delay > 0) {
-					delay = Math.max(delay - delta, 0);
-				} else {
-					// Get the percentage of the transition.
-					coolDown = Math.max(coolDown - delta, 0);
+				float tmpA = coolDownA, tmpB = coolDownB, tmpC = coolDownC;
 
-					// If the the animation has finished, draw the triangle
-					if (coolDown == 0) {
-						size -= BULLETSIZE;
-						health -= BULLETSIZE;
+				// Get the percentage of the transition.
+				coolDownA = Math.max(coolDownA - delta, 0);
+				coolDownB = Math.max(coolDownB - delta, 0);
+				coolDownC = Math.max(coolDownC - delta, 0);
 
-						// Calculate the points of the triangle.
+				if (coolDownA == 0 && tmpA != 0) {
+					shootpoint = (byte) (shootpoint & 6);
+					size -= BULLETSIZE;
+					health -= BULLETSIZE;
+				}
+				if (coolDownB == 0 && tmpB != 0) {
+					shootpoint = (byte) (shootpoint & 5);
+					size -= BULLETSIZE;
+					health -= BULLETSIZE;
+				}
+				if (coolDownC == 0 && tmpC != 0) {
+					shootpoint = (byte) (shootpoint & 3);
+					size -= BULLETSIZE;
+					health -= BULLETSIZE;
+				}
 
-						float tsize = size / 2f;
+				// If the the animation has finished, draw the triangle
+				if (shootpoint == 0) {
 
-						a.set(tsize * MathUtils.sinDeg(trotation), tsize
-								* MathUtils.cosDeg(trotation));
-						b.set(tsize * MathUtils.sinDeg(trotation + 120), tsize
-								* MathUtils.cosDeg(trotation + 120));
-						c.set(tsize * MathUtils.sinDeg(trotation - 120), tsize
-								* MathUtils.cosDeg(trotation - 120));
+					// Calculate the points of the triangle.
 
-						// Draw the triangle.
-						game.shape.triangle(a.x, a.y, c.x, c.y, b.x, b.y);
+					float tsize = size / 2f;
 
-						// Stop the method
-						return;
-					}
+					a.set(tsize * MathUtils.sinDeg(rotation),
+							tsize * MathUtils.cosDeg(rotation));
+					b.set(tsize * MathUtils.sinDeg(rotation + 120), tsize
+							* MathUtils.cosDeg(rotation + 120));
+					c.set(tsize * MathUtils.sinDeg(rotation - 120), tsize
+							* MathUtils.cosDeg(rotation - 120));
 
-					// Calculate the progress of the transition, and interpolate
-					// it
-					// to make it smooth.
-					progress = 1 - coolDown / COOLDOWN / difficulty;
-					progress = Interpolation.fade.apply(progress);
-					progress *= BULLETSIZE;
+					// Draw the triangle.
+					game.shape.triangle(a.x, a.y, c.x, c.y, b.x, b.y);
 
+					// Stop the method
+					return;
+				}
+
+				// Calculate the progress of the transition, and interpolate
+				// it
+				// to make it smooth.
+				if ((shootpoint & 1) != 0) {
+					progressA = 1 - coolDownA / COOLDOWN;
+					progressA = Interpolation.fade.apply(progressA);
+					progressA *= BULLETSIZE;
+				}
+
+				if ((shootpoint & 2) != 0) {
+					progressB = 1 - coolDownB / COOLDOWN;
+					progressB = Interpolation.fade.apply(progressB);
+					progressB *= BULLETSIZE;
+				}
+
+				if ((shootpoint & 4) != 0) {
+					progressC = 1 - coolDownC / COOLDOWN;
+					progressC = Interpolation.fade.apply(progressC);
+					progressC *= BULLETSIZE;
 				}
 
 				// Calculate the points of the triangle.
-				float tsize = size / 2f - progress / 2f;
+				float tsize = size / 2f - progressA / 2f - progressB / 2f
+						- progressC / 2f;
 
-				a.set(tsize * MathUtils.sinDeg(trotation),
-						tsize * MathUtils.cosDeg(trotation));
-				b.set(tsize * MathUtils.sinDeg(trotation + 120), tsize
-						* MathUtils.cosDeg(trotation + 120));
-				c.set(tsize * MathUtils.sinDeg(trotation - 120), tsize
-						* MathUtils.cosDeg(trotation - 120));
+				a.set(tsize * MathUtils.sinDeg(rotation),
+						tsize * MathUtils.cosDeg(rotation));
+				b.set(tsize * MathUtils.sinDeg(rotation + 120), tsize
+						* MathUtils.cosDeg(rotation + 120));
+				c.set(tsize * MathUtils.sinDeg(rotation - 120), tsize
+						* MathUtils.cosDeg(rotation - 120));
 
-				e.set(point(a, c, (BULLETSIZE - progress) / size));
-				d.set(point(a, b, (BULLETSIZE - progress) / size));
+				// Create a float array with the appropriate size to fit the
+				// vertices used to draw the polygon.
+				float[] verts = new float[((shootpoint & 1) != 0 ? 4 : 2)
+						+ ((shootpoint & 2) != 0 ? 4 : 2)
+						+ ((shootpoint & 4) != 0 ? 4 : 2)];
+				int x = 0;
 
-				// Draw the Triangle without the top.
-				game.shape.triangle(e.x, e.y, d.x, d.y, b.x, b.y);
-				game.shape.triangle(e.x, e.y, c.x, c.y, b.x, b.y);
+				Gdx.app.debug("PlayerSystem", "A: " + (shootpoint & 1) + "; B: "
+						+ (shootpoint & 2) + "; C: " + (shootpoint & 4));
+
+				// Top Notch
+				if ((shootpoint & 1) != 0) {
+					e.set(point(a, c, (BULLETSIZE - progressA) / size));
+					d.set(point(a, b, (BULLETSIZE - progressA) / size));
+					verts[x++] = e.x;
+					verts[x++] = e.y;
+					verts[x++] = d.x;
+					verts[x++] = d.y;
+				} else {
+					verts[x++] = a.x;
+					verts[x++] = a.y;
+				}
+
+				// Bottom Right Notch
+				if ((shootpoint & 2) != 0) {
+					f.set(point(b, a, (BULLETSIZE - progressB) / size));
+					g.set(point(b, c, (BULLETSIZE - progressB) / size));
+					verts[x++] = f.x;
+					verts[x++] = f.y;
+					verts[x++] = g.x;
+					verts[x++] = g.y;
+				} else {
+					verts[x++] = b.x;
+					verts[x++] = b.y;
+				}
+
+				// BottomLeft Notch
+				if ((shootpoint & 4) != 0) {
+					h.set(point(c, b, (BULLETSIZE - progressC) / size));
+					i.set(point(c, a, (BULLETSIZE - progressC) / size));
+					verts[x++] = h.x;
+					verts[x++] = h.y;
+					verts[x++] = i.x;
+					verts[x++] = i.y;
+				} else {
+					verts[x++] = c.x;
+					verts[x++] = c.y;
+				}
+
+				Global.fillPoly(verts);
 
 				// Resize the box2D triangle
-				updateShape(size - progress);
+				updateShape(size - progressA - progressB - progressC);
 			}
 		}
 
@@ -524,22 +608,23 @@ public class PlayerSystem extends EntitySystem implements ContactListener {
 	@Override
 	public void beginContact(Component object, Object object2) {
 
-		
 		if (object2 instanceof CircleComponent) {
 			CircleComponent circ = (CircleComponent) object2;
 			circ.die = true;
 
 			long[] tmp = new long[9];
 			tmp[0] = 0;
-			for(int i=1; i<tmp.length; i+=2) {
-				tmp[i] = (long)(25/game.speed);
-				tmp[i+1] = (long)(5/game.speed);
+			for (int i = 1; i < tmp.length; i += 2) {
+				tmp[i] = (long) (25 / game.speed);
+				tmp[i + 1] = (long) (5 / game.speed);
 			}
 			Gdx.input.vibrate(tmp, -1);
 
 			PooledEffect effect = triangleEffect.obtain();
 			effect.setPosition(0, 0);
 			effect.getEmitters().get(0).getScale().setHigh(size / 2f);
+			effect.getEmitters().get(0).getTint()
+					.setColors(new float[] { color.r, color.g, color.b });
 			game.particle.addEffect(effect);
 			health -= circ.scale / 5f;
 
@@ -562,15 +647,17 @@ public class PlayerSystem extends EntitySystem implements ContactListener {
 
 			long[] tmp = new long[9];
 			tmp[0] = 0;
-			for(int i=1; i<tmp.length; i+=2) {
-				tmp[i] = (long)(25/game.speed);
-				tmp[i+1] = (long)(5/game.speed);
+			for (int i = 1; i < tmp.length; i += 2) {
+				tmp[i] = (long) (25 / game.speed);
+				tmp[i + 1] = (long) (5 / game.speed);
 			}
 			Gdx.input.vibrate(tmp, -1);
 
 			PooledEffect effect = triangleEffect.obtain();
 			effect.setPosition(0, 0);
 			effect.getEmitters().get(0).getScale().setHigh(size / 2f);
+			effect.getEmitters().get(0).getTint()
+					.setColors(new float[] { color.r, color.g, color.b });
 			game.particle.addEffect(effect);
 			health -= cube.scale / 5f;
 

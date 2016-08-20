@@ -355,8 +355,6 @@ public class GameScreen extends AbstractGameScreen implements InputProcessor {
 		shape.setColor(Color.WHITE);
 		shape.circle(0, 0, 3, 100);
 
-		player.setDifficulty(difficulty);
-
 		engine.update(delta);
 
 		// ////////////////////////////SHAPE RENDERER//////////////////////
@@ -470,6 +468,12 @@ public class GameScreen extends AbstractGameScreen implements InputProcessor {
 				.getY(), 0));
 		return new Vector2(v3.x, v3.y);
 	}
+	
+	public Vector2 getPointer(int pointer) {
+		Vector3 v3 = cam.unproject(new Vector3(Gdx.input.getX(pointer), Gdx.input
+				.getY(pointer), 0));
+		return new Vector2(v3.x, v3.y);
+	}
 
 	/**
 	 * Add to the current score.
@@ -566,5 +570,7 @@ public class GameScreen extends AbstractGameScreen implements InputProcessor {
 	public boolean scrolled(int amount) {
 		return false;
 	}
+
+	
 
 }

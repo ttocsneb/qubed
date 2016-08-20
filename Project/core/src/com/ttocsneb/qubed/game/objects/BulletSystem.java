@@ -127,6 +127,9 @@ public class BulletSystem extends EntitySystem implements ContactListener {
 		fdef.density = 100;
 		fdef.friction = 0.7f;
 		fdef.restitution = 0.2f;
+		
+		//prevent the bullets to hit the player.
+		fdef.filter.maskBits = -3;//this is equivalent to 0b1111 1111 1111 1101
 
 		// Create the shape.
 		PolygonShape shape = new PolygonShape();
